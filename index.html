@@ -237,12 +237,25 @@
                     <div id="programsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
 
-                <!-- Tab Pautan -->
-                <div id="tab-links" class="space-y-5 animate-slide-up hidden max-w-6xl mx-auto">
+                <!-- Tab Pautan (Dikemaskini dengan Kategori) -->
+                <div id="tab-links" class="space-y-4 animate-slide-up hidden max-w-6xl mx-auto">
                     <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800">Repositori Pautan</h2>
                         <button onclick="openLinkModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-md text-sm font-bold active:scale-95 transition-transform"><i data-lucide="plus" class="w-4 h-4 md:mr-1"></i> <span class="hidden md:inline">Tambah</span></button>
                     </div>
+                    
+                    <!-- Penapis (Filter) Kategori -->
+                    <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-2">
+                        <i data-lucide="filter" class="w-5 h-5 text-gray-400 ml-2"></i>
+                        <select id="linkFilter" onchange="renderLinks()" class="flex-1 bg-transparent text-sm font-semibold text-gray-700 outline-none cursor-pointer border-none focus:ring-0">
+                            <option value="All">Paparkan Semua Kategori</option>
+                            <option value="Sumber Pendidikan">Sumber Pendidikan</option>
+                            <option value="Pengintegrasian ICT">Pengintegrasian ICT</option>
+                            <option value="Pengurusan">Pengurusan</option>
+                            <option value="Lain-lain">Lain-lain</option>
+                        </select>
+                    </div>
+
                     <div id="linksContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
 
@@ -314,10 +327,6 @@
                                         <label class="text-xs font-bold text-blue-700 mb-1 flex items-center"><i data-lucide="link" class="w-3.5 h-3.5 mr-1"></i> URL Google Apps Script</label>
                                         <input type="url" id="setGasUrl" placeholder="https://script.google.com/macros/s/..." class="w-full border border-blue-200 rounded-xl p-2.5 text-sm bg-blue-50/30 text-gray-700 outline-none mb-4">
                                         
-                                        <label class="text-xs font-bold text-indigo-700 mb-1 flex items-center"><i data-lucide="bot" class="w-3.5 h-3.5 mr-1"></i> API Key Gemini (Pilihan)</label>
-                                        <input type="text" id="setGeminiKey" placeholder="AIzaSy..." class="w-full border border-indigo-200 rounded-xl p-2.5 text-sm bg-indigo-50/30 text-gray-700 outline-none">
-                                        <p class="text-[9px] text-gray-500 mt-1 mb-2">Diperlukan jika sistem dipublish ke hosting luar untuk membolehkan AI Chatbot berfungsi.</p>
-
                                         <button type="button" onclick="syncDatabase()" class="mt-2 w-full bg-blue-50 text-blue-700 px-3 py-2.5 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-200 shadow-sm active:scale-95 flex justify-center"><i data-lucide="refresh-cw" class="w-3.5 h-3.5 mr-1" id="syncIcon"></i> Uji & Segerak Data</button>
                                     </div>
                                     <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl text-sm font-semibold shadow-md active:scale-95">Simpan Konfigurasi</button>
@@ -364,10 +373,28 @@
         <div class="bg-white rounded-2xl p-6 w-full max-w-md animate-slide-up shadow-2xl relative">
             <div class="flex justify-between items-center mb-5"><h3 id="modalTitleLink" class="font-bold text-lg">Tambah Pautan</h3><button onclick="closeLinkModal()" class="p-1.5 bg-gray-50 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div>
             <form id="linkForm" class="space-y-4">
-                <input type="text" id="addLinkTitle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="Tajuk Pautan">
-                <input type="url" id="addLinkUrl" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="https://...">
-                <textarea id="addLinkDesc" rows="2" class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="Penerangan ringkas..."></textarea>
-                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-md">Simpan</button>
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-gray-500 mb-1">Tajuk Pautan</label>
+                    <input type="text" id="addLinkTitle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="Cth: DELIMa">
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-gray-500 mb-1">URL (Pautan)</label>
+                    <input type="url" id="addLinkUrl" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="https://...">
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-gray-500 mb-1">Kategori</label>
+                    <select id="addLinkCategory" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none text-gray-700 cursor-pointer">
+                        <option value="Sumber Pendidikan">Sumber Pendidikan</option>
+                        <option value="Pengintegrasian ICT">Pengintegrasian ICT</option>
+                        <option value="Pengurusan">Pengurusan</option>
+                        <option value="Lain-lain">Lain-lain</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-gray-500 mb-1">Penerangan Ringkas</label>
+                    <textarea id="addLinkDesc" rows="2" class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="Maksud pautan..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-md mt-2">Simpan</button>
             </form>
         </div>
     </div>
@@ -423,7 +450,7 @@
         let editProgramId = null;
 
         let gasEndpointUrl = localStorage.getItem('pkg_gas_url') || 'https://script.google.com/macros/s/AKfycbwBkETtFzcceUu83o_2FeNlLJGfTmx3gmLFJJpSjoVpPMk03tahHX0hfUAGHaxZQVi7/exec'; 
-        let geminiApiKey = localStorage.getItem('pkg_gemini_key') || "AIzaSyCSFUBIPSq8az0NvdNKBssuoz018s0TeGM"; 
+        const geminiApiKey = "AIzaSyCSFUBIPSq8az0NvdNKBssuoz018s0TeGM"; // API Key dibenam secara terus (hardcode)
 
         let usersData = [{ id: 'admin1', name: 'Mohd Shahrol', station: 'PKG Sarawak', email: 'mohd.shahrol@moe.gov.my', phone: '012-3456789', password: 'password', role: 'Admin' }];
         let linksRepo = [], todos = [], programs = [], checklists = [];
@@ -475,9 +502,21 @@
             return items.map(item => {
                 if (!item.likes) item.likes = 0;
                 if (!item.comments) item.comments = [];
-                if (!item.actions) item.actions = []; // Pastikan actions array wujud
+                if (!item.actions) item.actions = []; 
                 if (typeof item.comments === 'string') { try { item.comments = JSON.parse(item.comments); } catch(e) { item.comments = []; } }
                 if (typeof item.actions === 'string') { try { item.actions = JSON.parse(item.actions); } catch(e) { item.actions = []; } }
+                
+                // --- PENYELESAIAN ISU TARIKH: Tukar UTC ke Waktu Malaysia (GMT+8) ---
+                if (item.date) {
+                    const d = new Date(item.date);
+                    if (!isNaN(d.getTime())) {
+                        const y = d.getFullYear();
+                        const m = String(d.getMonth() + 1).padStart(2, '0');
+                        const day = String(d.getDate()).padStart(2, '0');
+                        item.date = `${y}-${m}-${day}`; // Format dipaksa kepada YYYY-MM-DD waktu tempatan
+                    }
+                }
+                
                 return item;
             });
         }
@@ -537,6 +576,25 @@
         function testNotification() { if(Notification.permission === "granted") new Notification("Sistem PKG", {body: "Ujian berjaya!"}); }
         function sendDeviceNotification(t, b) { if(Notification.permission === "granted") new Notification(t, {body: b, icon: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}); }
 
+        // --- SISTEM PERINGATAN AUTOMATIK 3 KALI SEHARI ---
+        function setupDailyReminders() {
+            setInterval(() => {
+                if (!currentUser) return; 
+                const now = new Date(); const hours = now.getHours(); const minutes = now.getMinutes(); const dateString = now.toLocaleDateString('en-GB'); 
+                const targetHours = [9, 13, 16];
+                if (targetHours.includes(hours) && minutes === 0) {
+                    const storageKey = `daily_remind_${dateString}_${hours}`;
+                    if (!localStorage.getItem(storageKey)) {
+                        if (Notification.permission === "granted") {
+                            sendDeviceNotification("Peringatan Tugasan! 📋", `Hai ${currentUser.name.split(' ')[0]}, jangan lupa semak dan kemaskini status tugasan / program anda hari ini. You can do it! 💪`);
+                        }
+                        localStorage.setItem(storageKey, 'sent');
+                    }
+                }
+            }, 60000); 
+        }
+        setupDailyReminders();
+
         // --- FUNGSI MENGAMBIL TINDAKAN (ACTION) & HANTAR PERINGATAN ---
         function takeAction(id) {
             const todo = todos.find(t => t.id === id);
@@ -550,25 +608,23 @@
                     
                     if(gasEndpointUrl) apiCall('update', 'Todos', updatePayload);
                     showToast("Tindakan anda telah direkodkan!", "success");
-                    viewTodoDetails(id); // refresh modal
+                    viewTodoDetails(id); 
                 }
             }
         }
 
         function sendReminder(targetUserName, todoId) {
-            const todo = todos.find(t => t.id === id);
+            const todo = todos.find(t => t.id === todoId);
             if(!todo) return;
             
             showToast(`Menghantar peringatan kepada ${targetUserName}...`, "info");
             
-            // Simulasikan notifikasi push masuk (Untuk demo UX peranti sama)
-            // Di persekitaran sebenar, ini akan simpan rekod di Database & trigger notification di peranti target
             setTimeout(() => {
                 const title = "Peringatan Tugasan! 🔔";
                 const msg = `Hello, awak, ${currentUser.name} nak ingatkan awak untuk selesaikan tugasan ni tau: "${todo.text}". You can do it! 💪`;
                 
-                sendDeviceNotification(title, msg); // Push notification local
-                showMiniWindow(title, msg, "info", "Baik, akan diselesaikan!"); // In-app notification
+                sendDeviceNotification(title, msg); 
+                showMiniWindow(title, msg, "info", "Baik, akan diselesaikan!"); 
                 
                 try {
                     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -577,7 +633,6 @@
                 } catch(e) {}
             }, 3000); 
         }
-
 
         // --- BUTANG ANTI-STRESS & ANIMASI SALJI ---
         const stressMotivations = [
@@ -680,7 +735,7 @@
                 item.likes += 1;
                 const updatePayload = { ...item };
                 updatePayload.comments = JSON.stringify(item.comments || []);
-                updatePayload.actions = JSON.stringify(item.actions || []); // Kekalkan actions
+                updatePayload.actions = JSON.stringify(item.actions || []); 
                 if(gasEndpointUrl) apiCall('update', type === 'todo' ? 'Todos' : 'Programs', updatePayload);
                 if(type === 'todo') viewTodoDetails(id); else viewProgramDetails(id);
                 renderDashboardData(); if(type === 'program') renderPrograms();
@@ -704,7 +759,7 @@
                 
                 const updatePayload = { ...item };
                 updatePayload.comments = JSON.stringify(item.comments);
-                updatePayload.actions = JSON.stringify(item.actions || []); // Kekalkan actions
+                updatePayload.actions = JSON.stringify(item.actions || []); 
                 if(gasEndpointUrl) apiCall('update', type === 'todo' ? 'Todos' : 'Programs', updatePayload);
                 
                 if(type === 'todo') viewTodoDetails(id); else viewProgramDetails(id);
@@ -954,9 +1009,56 @@
         }
 
         // --- CRUD PAUTAN & PENGGUNA ---
-        function openLinkModal(id = null) { editLinkId = id; document.getElementById('modalTitleLink').innerText = id ? "Kemaskini Pautan" : "Tambah Pautan"; document.getElementById('linkForm').reset(); if(id) { const l = linksRepo.find(x => x.id === id); if(l) { document.getElementById('addLinkTitle').value = l.title; document.getElementById('addLinkUrl').value = l.url; document.getElementById('addLinkDesc').value = l.desc || ''; } } document.getElementById('linkModal').classList.remove('hidden'); document.getElementById('linkModal').classList.add('flex'); }
-        function closeLinkModal() { editLinkId = null; document.getElementById('linkModal').classList.add('hidden'); document.getElementById('linkModal').classList.remove('flex'); document.getElementById('linkForm').reset(); }
-        document.getElementById('linkForm').addEventListener('submit', async (e) => { e.preventDefault(); const payload = { title: document.getElementById('addLinkTitle').value, url: document.getElementById('addLinkUrl').value, desc: document.getElementById('addLinkDesc').value, addedBy: currentUser.name }; if (editLinkId) { const idx = linksRepo.findIndex(x => x.id === editLinkId); if(idx > -1) { linksRepo[idx] = { ...linksRepo[idx], ...payload, addedBy: linksRepo[idx].addedBy }; if(gasEndpointUrl) apiCall('update', 'Links', linksRepo[idx]); showToast("Pautan dikemaskini.", "success"); } } else { payload.id = Date.now(); linksRepo.push(payload); if(gasEndpointUrl) apiCall('create', 'Links', payload); showToast("Pautan ditambah.", "success"); } closeLinkModal(); renderLinks(); });
+        function openLinkModal(id = null) { 
+            editLinkId = id; 
+            document.getElementById('modalTitleLink').innerText = id ? "Kemaskini Pautan" : "Tambah Pautan"; 
+            document.getElementById('linkForm').reset(); 
+            if(id) { 
+                const l = linksRepo.find(x => x.id === id); 
+                if(l) { 
+                    document.getElementById('addLinkTitle').value = l.title; 
+                    document.getElementById('addLinkUrl').value = l.url; 
+                    document.getElementById('addLinkDesc').value = l.desc || ''; 
+                    document.getElementById('addLinkCategory').value = l.category || 'Sumber Pendidikan'; 
+                } 
+            } else {
+                document.getElementById('addLinkCategory').value = 'Sumber Pendidikan'; 
+            }
+            document.getElementById('linkModal').classList.remove('hidden'); 
+            document.getElementById('linkModal').classList.add('flex'); 
+        }
+
+        function closeLinkModal() { 
+            editLinkId = null; 
+            document.getElementById('linkModal').classList.add('hidden'); 
+            document.getElementById('linkModal').classList.remove('flex'); 
+            document.getElementById('linkForm').reset(); 
+        }
+
+        document.getElementById('linkForm').addEventListener('submit', async (e) => { 
+            e.preventDefault(); 
+            const payload = { 
+                title: document.getElementById('addLinkTitle').value, 
+                url: document.getElementById('addLinkUrl').value, 
+                desc: document.getElementById('addLinkDesc').value, 
+                category: document.getElementById('addLinkCategory').value,
+                addedBy: currentUser.name 
+            }; 
+            if (editLinkId) { 
+                const idx = linksRepo.findIndex(x => x.id === editLinkId); 
+                if(idx > -1) { 
+                    linksRepo[idx] = { ...linksRepo[idx], ...payload, addedBy: linksRepo[idx].addedBy }; 
+                    if(gasEndpointUrl) apiCall('update', 'Links', linksRepo[idx]); 
+                    showToast("Pautan dikemaskini.", "success"); 
+                } 
+            } else { 
+                payload.id = Date.now(); 
+                linksRepo.push(payload); 
+                if(gasEndpointUrl) apiCall('create', 'Links', payload); 
+                showToast("Pautan ditambah.", "success"); 
+            } 
+            closeLinkModal(); renderLinks(); 
+        });
 
         function openUserModal() { document.getElementById('userModal').classList.remove('hidden'); document.getElementById('userModal').classList.add('flex'); }
         function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); document.getElementById('userModal').classList.remove('flex'); document.getElementById('userForm').reset(); }
@@ -966,8 +1068,8 @@
 
         document.getElementById('profileForm').addEventListener('submit', (e) => { e.preventDefault(); const idx = usersData.findIndex(u => String(u.email) === String(currentUser.email)); if(idx > -1) { usersData[idx].name = document.getElementById('profName').value; usersData[idx].password = document.getElementById('profPass').value; currentUser = { ...usersData[idx] }; if(gasEndpointUrl) apiCall('update', 'Users', usersData[idx]); showToast("Profil dikemaskini!", "success"); document.getElementById('userName').innerText = currentUser.name; document.getElementById('userInitial').innerText = currentUser.name.charAt(0); } });
 
-        function renderSettings() { document.getElementById('profName').value = currentUser.name; document.getElementById('profPass').value = currentUser.password; if (currentUser.role === 'Admin') { document.getElementById('setGasUrl').value = gasEndpointUrl; document.getElementById('setGeminiKey').value = geminiApiKey; renderAdminUsers(); } }
-        document.getElementById('appSettingsForm').addEventListener('submit', (e) => { e.preventDefault(); gasEndpointUrl = document.getElementById('setGasUrl').value.trim(); localStorage.setItem('pkg_gas_url', gasEndpointUrl); geminiApiKey = document.getElementById('setGeminiKey').value.trim(); localStorage.setItem('pkg_gemini_key', geminiApiKey); showToast("Konfigurasi Disimpan!", "success"); });
+        function renderSettings() { document.getElementById('profName').value = currentUser.name; document.getElementById('profPass').value = currentUser.password; if (currentUser.role === 'Admin') { document.getElementById('setGasUrl').value = gasEndpointUrl; renderAdminUsers(); } }
+        document.getElementById('appSettingsForm').addEventListener('submit', (e) => { e.preventDefault(); gasEndpointUrl = document.getElementById('setGasUrl').value.trim(); localStorage.setItem('pkg_gas_url', gasEndpointUrl); showToast("Konfigurasi Disimpan!", "success"); });
 
         // --- FUNGSI RENDER UI ---
         function renderDashboardData() {
@@ -1030,33 +1132,70 @@
             lucide.createIcons();
         }
 
+        // MEMBAIKI SYNTAX ERROR & MENAMBAH LOGIK FILTER KATEGORI PAUTAN
         function renderLinks() {
-            document.getElementById('linksContainer').innerHTML = linksRepo.map(link => `
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col hover:border-blue-200">
-                <div class="flex justify-between items-start mb-3"><div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mr-3"><i data-lucide="link" class="w-5 h-5"></i></div><h3 class="font-bold text-gray-800 text-sm flex-1 pt-1">${link.title}</h3><a href="${link.url}" target="_blank" class="p-2 bg-gray-50 text-gray-400 hover:text-blue-600 rounded-lg"><i data-lucide="external-link" class="w-4 h-4"></i></a></div>
-                <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-3 rounded-xl flex-1">${link.desc}</p>
-                <div class="flex justify-between items-center"><span class="text-[10px] text-gray-400 font-medium"><i data-lucide="user" class="w-3 h-3 inline mr-0.5"></i> ${link.addedBy}</span>
-                ${checkEditPermission(link.addedBy) ? `<button onclick="openLinkModal(${link.id})" class="text-[10px] font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-1 rounded"><i data-lucide="edit-2" class="w-3 h-3 inline"></i> Edit</button>` : ''}
+            const filterVal = document.getElementById('linkFilter') ? document.getElementById('linkFilter').value : 'All';
+            const filteredLinks = filterVal === 'All' ? linksRepo : linksRepo.filter(l => l.category === filterVal);
+
+            document.getElementById('linksContainer').innerHTML = filteredLinks.map(link => `
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col hover:border-blue-200 transition-colors">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mr-3 flex-shrink-0">
+                        <i data-lucide="link" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1 pt-1">
+                        <h3 class="font-bold text-gray-800 text-sm">${link.title}</h3>
+                        <span class="text-[9px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded mt-1 inline-block uppercase tracking-wider border border-indigo-100">${link.category || 'Umum'}</span>
+                    </div>
+                    <a href="${link.url}" target="_blank" class="p-2 bg-gray-50 text-gray-400 hover:text-blue-600 rounded-lg ml-2 transition-colors flex-shrink-0">
+                        <i data-lucide="external-link" class="w-4 h-4"></i>
+                    </a>
                 </div>
-            </div>`).join('') || '<p class="text-sm text-gray-500">Tiada pautan.</p>';
+                <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-3 rounded-xl flex-1 border border-gray-50">${link.desc}</p>
+                <div class="flex justify-between items-center border-t border-gray-100 pt-3">
+                    <span class="text-[10px] text-gray-400 font-medium flex items-center">
+                        <i data-lucide="user" class="w-3 h-3 mr-1"></i> ${link.addedBy}
+                    </span>
+                    ${checkEditPermission(link.addedBy) ? `<button onclick="openLinkModal(${link.id})" class="text-[10px] font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"><i data-lucide="edit-2" class="w-3 h-3 inline mr-1"></i>Edit</button>` : ''}
+                </div>
+            </div>`).join('') || `<div class="col-span-full py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200"><i data-lucide="link-2-off" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i><p class="text-sm text-gray-500 font-medium">Tiada pautan untuk kategori ini.</p></div>`;
+            
             lucide.createIcons();
+        }
+
+        function renderAdminUsers() {
+            document.getElementById('adminUserList').innerHTML = usersData.map(user => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs mr-3">${user.name.charAt(0)}</div>
+                        <div>
+                            <p class="text-sm font-bold">${user.name}</p>
+                            <p class="text-[10px] text-gray-500">${user.email}</p>
+                        </div>
+                    </div>
+                    ${user.email !== currentUser.email ? `<button onclick="toggleUserRole('${user.id}')" class="text-[10px] font-bold bg-white border px-2 py-1.5 rounded hover:bg-gray-100 transition-colors shadow-sm">Tukar ${user.role==='Admin'?'Ke Pengguna':'Ke Admin'}</button>` : '<span class="text-xs italic text-gray-400 font-medium px-2">Anda</span>'}
+                </div>`).join('');
         }
 
         // --- GEMINI AI INTEGRATION ---
         async function fetchGeminiWithRetry(query, contextData, sysPrompt, retries = 5) {
             const apiKey = geminiApiKey || ""; 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
             const payload = { contents: [{ parts: [{ text: contextData + "\n\nSoalan Pengguna: " + query }] }], systemInstruction: { parts: [{ text: sysPrompt }] } };
             const delays = [1000, 2000, 4000, 8000, 16000];
             
             for (let i = 0; i < retries; i++) {
                 try {
                     const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(`HTTP error! status: ${response.status} - ${errData.error?.message || 'Unknown Error'}`);
+                    }
                     const data = await response.json();
                     return data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf bos, kamek kurang pasti bab tu.";
                 } catch (error) {
-                    if (i === retries - 1) return "Aduh, sistem kamek gagal berhubung. Pastikan **API Key Gemini** dah dimasukkan kat tab Tetapan ya!";
+                    console.error("Ralat Gemini:", error.message);
+                    if (i === retries - 1) return `Aduh, sistem kamek gagal berhubung. Ralat: ${error.message}`;
                     await new Promise(res => setTimeout(res, delays[i]));
                 }
             }
