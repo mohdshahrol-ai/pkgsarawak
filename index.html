@@ -469,17 +469,38 @@
         function sendDeviceNotification(t, b) { if(Notification.permission === "granted") new Notification(t, {body: b}); }
 
         // --- LOGIN / LOGOUT (DENGAN SAPAAN) ---
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const em = document.getElementById('emailInput').value.trim().toLowerCase();
             const pw = document.getElementById('passwordInput').value;
-            const user = usersData.find(u => String(u.email).toLowerCase() === em && u.password === pw);
+            const btn = e.target.querySelector('button[type="submit"]');
+            
+            // Tunjuk status memuat turun pangkalan data
+            const originalBtnText = btn.innerHTML;
+            btn.innerHTML = 'Menyemak Pangkalan Data...';
+            btn.disabled = true;
+            btn.classList.add('opacity-70');
+            document.getElementById('loginError').classList.add('hidden');
+
+            // 1. TARIK DATA DARI DATABASE DAHULU SEBELUM SEMAK KREDENSIAL PENGGUNA
+            if(gasEndpointUrl) {
+                const dbData = await apiCall('readAll', null);
+                if(dbData) {
+                    if(dbData.users) usersData = processUsersData(dbData.users);
+                    if(dbData.todos) todos = dbData.todos;
+                    if(dbData.programs) programs = dbData.programs;
+                    if(dbData.links) linksRepo = dbData.links;
+                }
+            }
+
+            // 2. SELEPAS DATA TERKINI DITARIK, BARU SAHKAN PENGGUNA
+            const user = usersData.find(u => String(u.email).toLowerCase() === em && String(u.password) === String(pw));
 
             if (user) {
                 currentUser = { ...user };
                 const hr = new Date().getHours(); const gr = hr < 12 ? 'Selamat Pagi' : hr < 18 ? 'Selamat Petang' : 'Selamat Malam';
                 document.getElementById('greetingText').innerText = `${gr}, ${currentUser.name.split(' ')[0]}`;
-                document.getElementById('userName').innerText = currentUser.name; document.getElementById('userInitial').innerText = currentUser.name.charAt(0);
+                document.getElementById('userName').innerText = currentUser.name; document.getElementById('userInitial').innerText = currentUser.name.charAt(0).toUpperCase();
                 
                 const isAdmin = currentUser.role === 'Admin';
                 document.getElementById('userRoleBadge').innerText = currentUser.role;
@@ -488,7 +509,7 @@
 
                 document.getElementById('loginView').classList.add('hidden'); document.getElementById('appView').classList.remove('hidden');
                 
-                // SAPAAN KHAS LUCU + IMEJ (BERFUNGSI SEMULA)
+                // SAPAAN KHAS LUCU + IMEJ
                 const fQ = [
                     "Kerja keraslah sampai jiran fikir awak main bomoh. Tapi jangan lupa rehat, kita bukan robot!",
                     "Jangan stress sangat. Kalau kerja tak siap hari ni, kan ada esok.",
@@ -500,23 +521,19 @@
                     `<div class='space-y-4'><img src='https://i.pinimg.com/originals/02/f7/e4/02f7e4be58fe95576c969783b1f4cc8f.png' class='w-full max-h-40 object-contain mx-auto drop-shadow-md rounded-xl'><p class='text-[14px] font-bold text-blue-800 bg-blue-50 p-3 rounded-xl border border-blue-100'>Hi USTP hebat, anda memang hebat, bersabar dan jaga kesihatan mental masing-masing. Fighting!</p><p class='text-xs text-gray-600 italic bg-gray-50 p-3 rounded-xl border border-gray-100'>"${fQ[Math.floor(Math.random() * fQ.length)]}"</p></div>`, 
                     "info", "Terima Kasih");
 
-                // FETCH DATABASE
-                if(gasEndpointUrl) {
-                    showToast("Menghubungkan ke Pangkalan Data...", "info");
-                    apiCall('readAll', null).then(dbData => {
-                        if(dbData) {
-                            if(dbData.users) usersData = processUsersData(dbData.users);
-                            if(dbData.todos) todos = dbData.todos;
-                            if(dbData.programs) programs = dbData.programs;
-                            if(dbData.links) linksRepo = dbData.links;
-                            renderDashboardData(); renderPrograms(); renderLinks(); renderCalendar();
-                            if(isAdmin) renderAdminUsers();
-                            showToast("Data Disegerakkan!", "success");
-                        }
-                    });
-                }
-                renderDashboardData();
-            } else { document.getElementById('loginError').classList.remove('hidden'); }
+                // Render Data ke Antaramuka (UI)
+                renderDashboardData(); renderPrograms(); renderLinks(); renderCalendar();
+                if(isAdmin) renderAdminUsers();
+                showToast("Berjaya Log Masuk & Data Disegerakkan!", "success");
+
+            } else { 
+                document.getElementById('loginError').classList.remove('hidden'); 
+            }
+            
+            // Kembalikan butang ke asal
+            btn.innerHTML = originalBtnText;
+            btn.disabled = false;
+            btn.classList.remove('opacity-70');
         });
 
         function logout() {
