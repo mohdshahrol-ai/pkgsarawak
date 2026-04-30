@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sistem Pengurusan PKG Sarawak</title>
     
-    <!-- Tambahan: Link Manifest Virtual dan Meta Tags untuk PWA -->
+    <!-- Link Manifest Virtual dan Meta Tags untuk PWA -->
     <link rel="manifest" id="manifestLink">
     <meta name="theme-color" content="#2563eb">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,26 +23,29 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        /* Mobile Hide Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Desktop Custom Scrollbar */
+        @media (min-width: 768px) {
+            .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+            .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+            .no-scrollbar::-webkit-scrollbar { display: block; } /* Re-enable for desktop but style it */
         }
 
-        .pb-safe {
-            padding-bottom: env(safe-area-inset-bottom);
-        }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 
         /* Animations */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes slideInRight { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         
-        .animate-fade-in { animation: fadeIn 0.2s ease-out; }
-        .animate-slide-up { animation: slideUp 0.3s ease-out; }
-        .animate-slide-in-right { animation: slideInRight 0.3s ease-out; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.4s ease-out forwards; }
+        .animate-slide-in-right { animation: slideInRight 0.3s ease-out forwards; }
 
         .glass-effect {
             background: rgba(255, 255, 255, 0.9);
@@ -51,481 +54,587 @@
         }
     </style>
 </head>
-<body class="flex justify-center h-screen overflow-hidden text-gray-800">
+<body class="flex justify-center h-screen overflow-hidden text-gray-800 bg-gray-100">
 
-    <!-- Container Utama -->
-    <div class="w-full max-w-md bg-gray-50 h-full flex flex-col relative shadow-2xl overflow-hidden">
-        
-        <!-- ================= BEKAS TOAST NOTIFICATION ================= -->
-        <div id="toastContainer" class="absolute top-4 left-0 right-0 z-[100] flex flex-col items-center space-y-2 pointer-events-none px-4">
-            <!-- Toast dijana secara dinamik oleh JS -->
-        </div>
+    <!-- ================= BEKAS TOAST NOTIFICATION ================= -->
+    <div id="toastContainer" class="fixed top-4 left-0 right-0 z-[100] flex flex-col items-center space-y-2 pointer-events-none px-4"></div>
 
-        <!-- ================= MINI WINDOW (MODAL CUSTOM) ================= -->
-        <div id="miniWindowModal" class="fixed inset-0 bg-black/60 z-[110] hidden flex-col justify-center items-center animate-fade-in backdrop-blur-sm px-4">
-            <div class="bg-white rounded-3xl p-6 w-full max-w-sm animate-slide-up shadow-2xl relative border border-gray-100">
-                <button onclick="closeMiniWindow()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-50 p-1.5 rounded-full transition-colors">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-                <div id="miniWindowIcon" class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-5 mx-auto shadow-inner">
-                    <i data-lucide="info" class="w-7 h-7"></i>
-                </div>
-                <h3 id="miniWindowTitle" class="text-lg font-bold text-gray-900 text-center mb-2">Tajuk</h3>
-                <p id="miniWindowMessage" class="text-sm text-gray-500 text-center mb-6 leading-relaxed">Mesej di sini</p>
-                <div class="flex space-x-3" id="miniWindowButtons">
-                    <button id="miniWindowBtnConfirm" class="flex-1 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-md active:scale-95 transform duration-150">OK</button>
-                    <button id="miniWindowBtnCancel" onclick="closeMiniWindow()" class="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-200 transition-colors hidden">Batal</button>
-                </div>
+    <!-- ================= MINI WINDOW (MODAL CUSTOM) ================= -->
+    <div id="miniWindowModal" class="fixed inset-0 bg-black/60 z-[110] hidden flex-col justify-center items-center animate-fade-in backdrop-blur-sm px-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md animate-slide-up shadow-2xl relative border border-gray-100">
+            <button onclick="closeMiniWindow()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-200 p-1.5 rounded-full transition-all transform hover:scale-110 active:scale-95">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div id="miniWindowIcon" class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-5 mx-auto shadow-inner">
+                <i data-lucide="info" class="w-7 h-7"></i>
+            </div>
+            <h3 id="miniWindowTitle" class="text-lg font-bold text-gray-900 text-center mb-2">Tajuk</h3>
+            <div id="miniWindowMessage" class="text-sm text-gray-500 text-center mb-6 leading-relaxed">Mesej di sini</div>
+            <div class="flex space-x-3" id="miniWindowButtons">
+                <button id="miniWindowBtnConfirm" class="flex-1 bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-md active:scale-95 transform duration-150">OK</button>
+                <button id="miniWindowBtnCancel" onclick="closeMiniWindow()" class="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-200 transition-colors hidden active:scale-95 transform duration-150">Batal</button>
             </div>
         </div>
+    </div>
 
-        <!-- ================= PANDANGAN LOG MASUK ================= -->
-        <div id="loginView" class="absolute inset-0 bg-white z-50 flex flex-col justify-center px-6 animate-fade-in">
-            <div class="text-center mb-10">
-                <div class="w-20 h-20 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg">
-                    <i data-lucide="network" class="text-white w-10 h-10"></i>
+    <!-- ================= PANDANGAN LOG MASUK ================= -->
+    <div id="loginView" class="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center px-4 md:px-0 animate-fade-in">
+        <div class="flex flex-col md:flex-row w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all">
+            <!-- Panel Kiri (Branding) - Hanya papar di Desktop -->
+            <div class="hidden md:flex md:w-5/12 bg-gradient-to-br from-blue-700 to-indigo-900 p-10 flex-col justify-between text-white relative overflow-hidden">
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-10 -left-10 w-40 h-40 bg-blue-400 opacity-20 rounded-full blur-2xl"></div>
+                
+                <div class="relative z-10">
+                    <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 shadow-lg border border-white/30">
+                        <i data-lucide="network" class="text-white w-8 h-8"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold tracking-tight mb-2">PKG Sarawak</h1>
+                    <p class="text-blue-100 text-sm leading-relaxed">Sistem Pengurusan Tugas, Kalendar & Repositori Pintar KPM.</p>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-900">PKG Sarawak</h1>
-                <p class="text-gray-500 mt-2">Sistem Pengurusan & AI Pembantu</p>
+                <div class="relative z-10">
+                    <p class="text-xs text-blue-200 opacity-80">&copy; 2026 USTP Hebat.</p>
+                </div>
             </div>
 
-            <form id="loginForm" class="space-y-5">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">E-mel MOE</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="mail" class="text-gray-400 w-5 h-5"></i>
-                        </div>
-                        <input type="email" id="emailInput" required
-                            class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                            placeholder="contoh@moe.gov.my">
+            <!-- Panel Kanan (Form) -->
+            <div class="w-full md:w-7/12 p-8 md:p-12 flex flex-col justify-center">
+                <div class="md:hidden text-center mb-8">
+                    <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg">
+                        <i data-lucide="network" class="text-white w-8 h-8"></i>
                     </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kata Laluan</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="lock" class="text-gray-400 w-5 h-5"></i>
-                        </div>
-                        <input type="password" id="passwordInput" required
-                            class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                            placeholder="••••••••">
-                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900">PKG Sarawak</h1>
+                    <p class="text-gray-500 text-sm mt-1">Log Masuk Sistem</p>
                 </div>
                 
-                <div id="loginError" class="text-red-500 text-sm hidden text-center">Maklumat log masuk tidak sah.</div>
+                <h2 class="hidden md:block text-2xl font-bold text-gray-800 mb-6">Log Masuk</h2>
 
-                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform active:scale-95">
-                    Log Masuk
-                </button>
-            </form>
-            
-            <div class="mt-8 text-center text-xs text-gray-400">
-                <p>E-mel: mohd.shahrol@moe.gov.my | Laluan: password (Admin)</p>
-                <p>E-mel: pegawai@moe.gov.my | Laluan: password (Pengguna)</p>
-            </div>
-        </div>
-
-        <!-- ================= HEADER APLIKASI ================= -->
-        <header id="appHeader" class="bg-white px-4 pt-6 pb-4 flex justify-between items-center shadow-sm z-10 hidden relative">
-            <div class="flex items-center">
-                <div class="app-logo-display w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold mr-3 shadow-sm overflow-hidden">
-                    P
-                </div>
-                <div>
-                    <h1 class="app-title-display font-bold text-gray-800 tracking-tight leading-tight">PKG Sarawak</h1>
-                    <p id="userRoleBadge" class="text-[10px] font-semibold text-blue-600 bg-blue-50 inline-block px-1.5 rounded uppercase"></p>
-                </div>
-            </div>
-            <div class="flex space-x-3 text-gray-500">
-                <button class="relative hover:text-blue-600 transition-colors">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
-                    <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                </button>
-                <button onclick="logout()" class="hover:text-red-600 transition-colors">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                </button>
-            </div>
-        </header>
-
-        <!-- ================= KANDUNGAN UTAMA ================= -->
-        <main id="mainContent" class="flex-1 overflow-y-auto pb-24 no-scrollbar hidden bg-gray-50">
-            
-            <!-- Tab Papan Pemuka -->
-            <div id="tab-dashboard" class="p-4 space-y-6 animate-slide-up block">
-                <!-- Kad Ringkasan -->
-                <div class="bg-gradient-to-br from-blue-600 to-indigo-800 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
-                    <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4">
-                        <i data-lucide="activity" class="w-32 h-32"></i>
+                <form id="loginForm" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">E-mel Rasmi</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-500">
+                                <i data-lucide="mail" class="text-gray-400 w-5 h-5 group-focus-within:text-blue-500 transition-colors"></i>
+                            </div>
+                            <input type="email" id="emailInput" required
+                                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none bg-gray-50 focus:bg-white"
+                                placeholder="contoh@moe.gov.my">
+                        </div>
                     </div>
-                    <h2 id="greetingText" class="text-xl font-bold mb-1 relative z-10">Selamat Pagi</h2>
-                    <p class="text-blue-100 text-sm mb-4 relative z-10">Ringkasan Sistem &bull; <span id="currentDateDisplayDashboard"></span></p>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Kata Laluan</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="lock" class="text-gray-400 w-5 h-5 group-focus-within:text-blue-500 transition-colors"></i>
+                            </div>
+                            <input type="password" id="passwordInput" required
+                                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none bg-gray-50 focus:bg-white"
+                                placeholder="••••••••">
+                        </div>
+                    </div>
                     
-                    <div class="grid grid-cols-3 gap-3 relative z-10">
-                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/20">
-                            <span id="stat-todos" class="block text-2xl font-bold">4</span>
-                            <span class="text-[10px] uppercase tracking-wider opacity-80">Tugasan</span>
-                        </div>
-                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/20">
-                            <span id="stat-programs" class="block text-2xl font-bold">3</span>
-                            <span class="text-[10px] uppercase tracking-wider opacity-80">Program</span>
-                        </div>
-                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/20">
-                            <span class="block text-2xl font-bold text-green-300">80%</span>
-                            <span class="text-[10px] uppercase tracking-wider opacity-80">Prestasi</span>
-                        </div>
-                    </div>
-                </div>
+                    <div id="loginError" class="text-red-500 text-sm hidden text-center bg-red-50 p-2 rounded-lg border border-red-100">Maklumat log masuk tidak sah.</div>
 
-                <!-- Tugasan Hari Ini -->
-                <div>
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="font-semibold text-gray-800 flex items-center">
-                            <i data-lucide="list-todo" class="w-4 h-4 mr-2 text-blue-600"></i>
-                            Tugasan Tertunggak / Aktif
-                        </h3>
-                        <button onclick="switchTab('calendar')" class="text-blue-600 text-xs font-medium hover:underline">Lihat Semua</button>
-                    </div>
-                    <div id="todoListContainer" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                        <!-- Senarai Todo dijana oleh JS -->
-                    </div>
-                </div>
-
-                <!-- Checklist Terkini -->
-                <div>
-                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
-                        <i data-lucide="check-square" class="w-4 h-4 mr-2 text-blue-600"></i>
-                        Status Semakan (Checklist)
-                    </h3>
-                    <div id="checklistContainer" class="space-y-3">
-                        <!-- Senarai Checklist dijana oleh JS -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab Kalendar -->
-            <div id="tab-calendar" class="p-4 space-y-5 animate-slide-in-right hidden h-full flex-col">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-bold text-gray-800">Kalendar & Tugasan</h2>
-                    <button onclick="openAddModal()" class="p-2 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors shadow-sm"><i data-lucide="plus" class="w-5 h-5"></i></button>
-                </div>
+                    <button type="submit" class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform active:scale-95">
+                        Log Masuk Sistem
+                    </button>
+                </form>
                 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-                    <div class="flex justify-between items-center mb-4">
-                        <span id="calendarMonthDisplay" class="font-bold text-gray-800 text-sm uppercase tracking-wider">Bulan Tahun</span>
-                        <div class="flex space-x-1">
-                            <button onclick="prevMonth()" class="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-600"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
-                            <button onclick="nextMonth()" class="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-600"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                <div class="mt-8 text-center text-xs text-gray-400 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <p class="font-medium text-gray-600 mb-1">Akses Ujian:</p>
+                    <p>mohd.shahrol@moe.gov.my (Admin)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= STRUKTUR UTAMA APLIKASI ================= -->
+    <div id="appView" class="hidden w-full h-full flex flex-col md:flex-row bg-gray-50 overflow-hidden relative max-w-7xl mx-auto shadow-2xl">
+        
+        <!-- SIDEBAR (Desktop Sahaja) -->
+        <aside class="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-full z-20 flex-shrink-0">
+            <!-- Branding -->
+            <div class="p-6 border-b border-gray-100 flex items-center">
+                <div class="app-logo-display w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold mr-3 shadow-md overflow-hidden flex-shrink-0">P</div>
+                <div class="overflow-hidden">
+                    <h1 class="app-title-display font-bold text-gray-800 tracking-tight leading-tight truncate">PKG Sarawak</h1>
+                    <p id="userRoleBadgeDesktop" class="text-[10px] font-bold text-blue-600 uppercase tracking-wider mt-0.5">Admin</p>
+                </div>
+            </div>
+
+            <!-- Navigasi -->
+            <nav class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
+                <button onclick="switchTab('dashboard')" class="nav-btn-desktop flex items-center p-3 w-full rounded-xl text-sm font-semibold bg-blue-50 text-blue-700 transition-all group" data-target="dashboard">
+                    <i data-lucide="home" class="w-5 h-5 mr-3 group-hover:scale-110 transition-transform"></i> Papan Pemuka
+                </button>
+                <button onclick="switchTab('calendar')" class="nav-btn-desktop flex items-center p-3 w-full rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-all group" data-target="calendar">
+                    <i data-lucide="calendar" class="w-5 h-5 mr-3 group-hover:scale-110 transition-transform"></i> Kalendar & Tugas
+                </button>
+                <button onclick="switchTab('programs')" class="nav-btn-desktop flex items-center p-3 w-full rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-all group" data-target="programs">
+                    <i data-lucide="folder" class="w-5 h-5 mr-3 group-hover:scale-110 transition-transform"></i> Direktori Program
+                </button>
+                <button onclick="switchTab('links')" class="nav-btn-desktop flex items-center p-3 w-full rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-all group" data-target="links">
+                    <i data-lucide="link" class="w-5 h-5 mr-3 group-hover:scale-110 transition-transform"></i> Repositori Pautan
+                </button>
+                <button onclick="switchTab('chatbot')" class="nav-btn-desktop flex items-center p-3 w-full rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-all group" data-target="chatbot">
+                    <i data-lucide="bot" class="w-5 h-5 mr-3 group-hover:scale-110 transition-transform text-indigo-500"></i> AI Pembantu
+                </button>
+                <button onclick="switchTab('settings')" class="nav-btn-desktop flex items-center p-3 w-full rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-all group mt-4" data-target="settings">
+                    <i data-lucide="settings" class="w-5 h-5 mr-3 group-hover:scale-110 transition-transform border-t border-gray-100 pt-2"></i> Tetapan Sistem
+                </button>
+            </nav>
+
+            <!-- User Info Footer -->
+            <div class="p-4 border-t border-gray-100 bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center overflow-hidden">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs flex-shrink-0" id="userInitialDesktop">U</div>
+                        <div class="ml-2 overflow-hidden">
+                            <p class="text-xs font-bold text-gray-800 truncate" id="userNameDesktop">User Name</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-7 gap-1 text-center text-xs mb-2 font-medium text-gray-400">
-                        <div>Ah</div><div>Is</div><div>Se</div><div>Ra</div><div>Kh</div><div>Ju</div><div>Sa</div>
-                    </div>
-                    <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center text-sm">
-                        <!-- Kalendar dijana oleh JS -->
-                    </div>
-                </div>
-
-                <div class="flex-1 mt-2">
-                    <h3 id="selectedDateHeader" class="font-semibold text-gray-800 mb-3 text-sm">Tarikh Semasa</h3>
-                    <div id="fullTodoList" class="space-y-2">
-                        <!-- Senarai penuh todo dijana oleh JS -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab Program -->
-            <div id="tab-programs" class="p-4 space-y-4 animate-slide-in-right hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-xl font-bold text-gray-800">Program Terkini</h2>
-                    <button class="p-2 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100"><i data-lucide="search" class="w-5 h-5"></i></button>
-                </div>
-                <div id="programsContainer" class="space-y-4">
-                    <!-- Senarai Program dijana oleh JS -->
-                </div>
-            </div>
-
-            <!-- Tab Repositori Pautan -->
-            <div id="tab-links" class="p-4 space-y-4 animate-slide-in-right hidden pb-10">
-                <div class="flex justify-between items-center mb-2">
-                    <h2 class="text-xl font-bold text-gray-800">Repositori Pautan</h2>
-                    <button onclick="openAddLinkModal()" class="p-2 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors shadow-sm"><i data-lucide="plus" class="w-5 h-5"></i></button>
-                </div>
-                <div id="linksContainer" class="space-y-3">
-                    <!-- Senarai Pautan dijana oleh JS -->
-                </div>
-            </div>
-
-            <!-- Tab Tetapan -->
-            <div id="tab-settings" class="p-4 space-y-6 animate-slide-in-right hidden pb-10">
-                <h2 class="text-xl font-bold text-gray-800">Tetapan</h2>
-                
-                <!-- Notifikasi Peranti -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 border-l-4 border-l-green-500">
-                    <h3 class="font-semibold text-gray-800 mb-4 flex items-center"><i data-lucide="bell" class="w-4 h-4 mr-2 text-green-600"></i> Notifikasi Peranti</h3>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-800">Aktifkan Makluman</p>
-                            <p class="text-[10px] text-gray-500">Terima notifikasi walau app ditutup</p>
-                        </div>
-                        <button id="btnNotif" onclick="requestNotificationPermission()" class="bg-gray-200 text-gray-600 px-3 py-1.5 rounded-full text-xs font-bold transition-colors">
-                            Minta Akses
-                        </button>
-                    </div>
-                    <button onclick="testNotification()" id="btnTestNotif" class="mt-4 w-full bg-green-50 text-green-700 border border-green-200 px-3 py-2.5 rounded-lg text-xs font-bold transition-colors hidden shadow-sm">
-                        <i data-lucide="smartphone" class="w-4 h-4 inline mr-1"></i> Uji Hantar Notifikasi ke HP
+                    <button onclick="logout()" class="text-gray-400 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50" title="Log Keluar">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
                     </button>
                 </div>
+            </div>
+        </aside>
 
-                <!-- Profil Pengguna -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-                    <h3 class="font-semibold text-gray-800 mb-4 flex items-center"><i data-lucide="user" class="w-4 h-4 mr-2 text-blue-600"></i> Profil Pengguna</h3>
-                    <form id="profileForm" class="space-y-3">
-                        <div><label class="text-xs font-medium text-gray-500">Nama Penuh</label><input type="text" id="profName" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm bg-gray-50" required></div>
-                        <div><label class="text-xs font-medium text-gray-500">Stesen Bertugas</label><input type="text" id="profStation" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm bg-gray-50" required></div>
-                        <div><label class="text-xs font-medium text-gray-500">E-mel Rasmi</label><input type="email" id="profEmail" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm bg-gray-50" required disabled></div>
-                        <div><label class="text-xs font-medium text-gray-500">No Telefon</label><input type="tel" id="profPhone" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm bg-gray-50" required></div>
-                        <div><label class="text-xs font-medium text-gray-500">Kata Laluan</label><input type="text" id="profPass" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm bg-gray-50" required></div>
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 transition-colors text-white py-2.5 rounded-lg text-sm font-medium mt-4 shadow-sm">Kemaskini Profil</button>
-                    </form>
+        <!-- KANDUNGAN UTAMA (Kanan Desktop / Full Mobile) -->
+        <div class="flex-1 flex flex-col h-full relative overflow-hidden bg-gray-50 md:bg-gray-100/50">
+            
+            <!-- HEADER MOBILE (Hidden on Desktop) -->
+            <header id="appHeader" class="md:hidden bg-white px-4 pt-6 pb-4 flex justify-between items-center shadow-sm z-10 relative">
+                <div class="flex items-center">
+                    <div class="app-logo-display w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold mr-3 shadow-sm overflow-hidden">P</div>
+                    <div>
+                        <h1 class="app-title-display font-bold text-gray-800 tracking-tight leading-tight">PKG Sarawak</h1>
+                        <p id="userRoleBadgeMobile" class="text-[10px] font-semibold text-blue-600 bg-blue-50 inline-block px-1.5 rounded uppercase"></p>
+                    </div>
+                </div>
+                <div class="flex space-x-3 text-gray-500">
+                    <button class="relative hover:text-blue-600 transition-colors">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                    </button>
+                    <button onclick="logout()" class="hover:text-red-600 transition-colors">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- KAWASAN TAB (Scrollable) -->
+            <main id="mainContent" class="flex-1 overflow-y-auto custom-scrollbar no-scrollbar pb-24 md:pb-6 relative w-full h-full">
+                
+                <!-- Tab Papan Pemuka -->
+                <div id="tab-dashboard" class="p-4 md:p-8 space-y-6 animate-slide-up block max-w-5xl mx-auto w-full">
+                    <!-- Kad Ringkasan Utama -->
+                    <div class="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 rounded-2xl md:rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden transform transition-all hover:shadow-2xl">
+                        <div class="absolute top-0 right-0 opacity-10 transform translate-x-4 -translate-y-4 md:translate-x-10 md:-translate-y-10">
+                            <i data-lucide="activity" class="w-32 h-32 md:w-48 md:h-48"></i>
+                        </div>
+                        <h2 id="greetingText" class="text-2xl md:text-3xl font-bold mb-2 relative z-10 tracking-tight">Selamat Pagi</h2>
+                        <p class="text-blue-100 text-sm md:text-base mb-6 relative z-10 flex items-center">
+                            <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> <span id="currentDateDisplayDashboard"></span>
+                        </p>
+                        
+                        <div class="grid grid-cols-3 gap-3 md:gap-6 relative z-10">
+                            <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 md:p-4 text-center border border-white/20 hover:bg-white/20 transition-colors cursor-pointer" onclick="switchTab('calendar')">
+                                <span id="stat-todos" class="block text-2xl md:text-4xl font-bold mb-1">0</span>
+                                <span class="text-[10px] md:text-xs uppercase tracking-wider opacity-90 font-medium">Tugasan</span>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 md:p-4 text-center border border-white/20 hover:bg-white/20 transition-colors cursor-pointer" onclick="switchTab('programs')">
+                                <span id="stat-programs" class="block text-2xl md:text-4xl font-bold mb-1">0</span>
+                                <span class="text-[10px] md:text-xs uppercase tracking-wider opacity-90 font-medium">Program</span>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 md:p-4 text-center border border-white/20">
+                                <span class="block text-2xl md:text-4xl font-bold text-green-300 mb-1">80%</span>
+                                <span class="text-[10px] md:text-xs uppercase tracking-wider opacity-90 font-medium">Prestasi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Layout Grid untuk Desktop (Pisahkan Todo dan Checklist) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Tugasan Aktif -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                            <div class="flex justify-between items-center p-4 md:p-5 border-b border-gray-50 bg-gray-50/50">
+                                <h3 class="font-bold text-gray-800 flex items-center text-sm md:text-base">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mr-3">
+                                        <i data-lucide="list-todo" class="w-4 h-4"></i>
+                                    </div>
+                                    Tugasan Semasa
+                                </h3>
+                                <button onclick="switchTab('calendar')" class="text-blue-600 text-xs font-semibold hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">Lihat Semua</button>
+                            </div>
+                            <div id="todoListContainer" class="flex-1 p-2">
+                                <!-- Senarai Todo dijana oleh JS -->
+                            </div>
+                        </div>
+
+                        <!-- Checklist Terkini -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                            <div class="p-4 md:p-5 border-b border-gray-50 bg-gray-50/50">
+                                <h3 class="font-bold text-gray-800 flex items-center text-sm md:text-base">
+                                    <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mr-3">
+                                        <i data-lucide="check-square" class="w-4 h-4"></i>
+                                    </div>
+                                    Status Laporan / Semakan
+                                </h3>
+                            </div>
+                            <div id="checklistContainer" class="p-4 space-y-4">
+                                <!-- Senarai Checklist dijana oleh JS -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Tetapan Sistem (Admin Only) -->
-                <div id="adminSettingsSection" class="hidden space-y-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 border-l-4 border-l-red-500">
-                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center"><i data-lucide="settings" class="w-4 h-4 mr-2 text-red-600"></i> Tetapan Sistem & Database</h3>
-                        <form id="appSettingsForm" class="space-y-4">
-                            <div>
-                                <label class="text-xs font-medium text-gray-500">Nama Sistem</label>
-                                <input type="text" id="setAppName" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm bg-gray-50" required>
-                            </div>
-                            <div>
-                                <label class="text-xs font-medium text-gray-500">URL Logo Gambar</label>
-                                <input type="url" id="setAppLogo" placeholder="Cth: https://example.com/logo.png" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm bg-gray-50">
-                            </div>
-                            
-                            <!-- Setup Database Baharu -->
-                            <div class="pt-3 border-t border-gray-100">
-                                <label class="text-xs font-bold text-blue-600 flex items-center"><i data-lucide="database" class="w-3 h-3 mr-1"></i> URL Google Apps Script (Endpoint DB)</label>
-                                <p class="text-[10px] text-gray-400 mb-1">Pautkan PWA ke Google Sheets melalui URL Web App.</p>
-                                <input type="url" id="setGasUrl" placeholder="https://script.google.com/macros/s/..." class="w-full border border-gray-200 rounded-lg p-2.5 text-sm bg-gray-50 text-gray-600 focus:border-blue-500 focus:ring-blue-500">
-                                <div class="flex space-x-2 mt-2">
-                                    <button type="button" onclick="syncDatabase()" class="flex-1 bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-200 shadow-sm flex justify-center items-center">
-                                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5 mr-1" id="syncIcon"></i> Uji & Segerak Data
-                                    </button>
+                <!-- Tab Kalendar -->
+                <div id="tab-calendar" class="p-4 md:p-8 space-y-5 animate-slide-in-right hidden h-full flex-col max-w-6xl mx-auto w-full">
+                    <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-2">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">Kalendar & Tugasan</h2>
+                            <p class="text-xs text-gray-500">Urus jadual dan kerja hakiki.</p>
+                        </div>
+                        <button onclick="openAddModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all transform active:scale-95 shadow-md font-medium text-sm">
+                            <i data-lucide="plus" class="w-4 h-4 md:mr-2"></i> <span class="hidden md:inline">Tambah Tugasan</span>
+                        </button>
+                    </div>
+                    
+                    <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
+                        <!-- Komponen Kalendar -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 lg:w-1/3 flex-shrink-0 h-fit">
+                            <div class="flex justify-between items-center mb-5">
+                                <span id="calendarMonthDisplay" class="font-bold text-gray-800 text-sm uppercase tracking-wider bg-gray-50 px-3 py-1.5 rounded-lg">Bulan Tahun</span>
+                                <div class="flex space-x-1">
+                                    <button onclick="prevMonth()" class="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-600 transition-colors"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                                    <button onclick="nextMonth()" class="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-600 transition-colors"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
                                 </div>
                             </div>
+                            <div class="grid grid-cols-7 gap-1 text-center text-xs mb-3 font-bold text-gray-400">
+                                <div>Ah</div><div>Is</div><div>Se</div><div>Ra</div><div>Kh</div><div>Ju</div><div>Sa</div>
+                            </div>
+                            <div id="calendarGrid" class="grid grid-cols-7 gap-1 md:gap-2 text-center text-sm">
+                                <!-- Kalendar dijana oleh JS -->
+                            </div>
+                        </div>
 
-                            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 transition-colors text-white py-2.5 rounded-lg text-sm font-medium mt-2 shadow-sm">Simpan Tetapan Utama</button>
+                        <!-- Senarai Tugasan Hari Dipilih -->
+                        <div class="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div class="p-5 border-b border-gray-50 bg-gray-50/50">
+                                <h3 id="selectedDateHeader" class="font-bold text-gray-800 text-lg">Tarikh Semasa</h3>
+                            </div>
+                            <div id="fullTodoList" class="p-4 space-y-3 overflow-y-auto custom-scrollbar flex-1">
+                                <!-- Senarai penuh todo dijana oleh JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Program -->
+                <div id="tab-programs" class="p-4 md:p-8 space-y-5 animate-slide-in-right hidden max-w-6xl mx-auto w-full">
+                    <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">Direktori Program</h2>
+                            <p class="text-xs text-gray-500">Senarai aktiviti anjuran PKG.</p>
+                        </div>
+                        <button class="p-2 bg-gray-50 text-gray-600 rounded-xl hover:bg-gray-100 transition-colors border border-gray-200">
+                            <i data-lucide="filter" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div id="programsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <!-- Senarai Program dijana oleh JS -->
+                    </div>
+                </div>
+
+                <!-- Tab Repositori Pautan -->
+                <div id="tab-links" class="p-4 md:p-8 space-y-5 animate-slide-in-right hidden max-w-6xl mx-auto w-full">
+                    <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">Repositori Pautan</h2>
+                            <p class="text-xs text-gray-500">Simpanan URL rasmi sistem KPM.</p>
+                        </div>
+                        <button onclick="openAddLinkModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all transform active:scale-95 shadow-md font-medium text-sm">
+                            <i data-lucide="plus" class="w-4 h-4 md:mr-2"></i> <span class="hidden md:inline">Tambah Pautan</span>
+                        </button>
+                    </div>
+                    <div id="linksContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Senarai Pautan dijana oleh JS -->
+                    </div>
+                </div>
+
+                <!-- Tab Tetapan -->
+                <div id="tab-settings" class="p-4 md:p-8 space-y-6 animate-slide-in-right hidden max-w-4xl mx-auto w-full">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-2">
+                        <h2 class="text-xl font-bold text-gray-800">Tetapan & Profil</h2>
+                        <p class="text-xs text-gray-500 mt-1">Uruskan maklumat peribadi dan konfigurasi sistem.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-6">
+                            <!-- Notifikasi Peranti -->
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 relative overflow-hidden group">
+                                <div class="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
+                                <h3 class="font-bold text-gray-800 mb-4 flex items-center text-sm"><i data-lucide="bell" class="w-4 h-4 mr-2 text-green-600"></i> Notifikasi Peranti</h3>
+                                <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-800">Status Makluman</p>
+                                        <p class="text-[10px] text-gray-500">Terima notifikasi penting</p>
+                                    </div>
+                                    <button id="btnNotif" onclick="requestNotificationPermission()" class="bg-white border border-gray-200 text-gray-700 px-4 py-1.5 rounded-lg text-xs font-bold transition-all hover:bg-gray-50 shadow-sm">
+                                        Minta Akses
+                                    </button>
+                                </div>
+                                <button onclick="testNotification()" id="btnTestNotif" class="mt-3 w-full bg-green-50 text-green-700 border border-green-200 px-3 py-2.5 rounded-xl text-xs font-bold transition-all hover:bg-green-100 hidden shadow-sm active:scale-95">
+                                    <i data-lucide="smartphone" class="w-4 h-4 inline mr-1"></i> Uji Hantar Notifikasi
+                                </button>
+                            </div>
+
+                            <!-- Profil Pengguna -->
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                                <h3 class="font-bold text-gray-800 mb-4 flex items-center text-sm"><i data-lucide="user" class="w-4 h-4 mr-2 text-blue-600"></i> Profil Pengguna</h3>
+                                <form id="profileForm" class="space-y-3.5">
+                                    <div><label class="text-xs font-semibold text-gray-600 mb-1 block">Nama Penuh</label><input type="text" id="profName" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" required></div>
+                                    <div><label class="text-xs font-semibold text-gray-600 mb-1 block">Stesen Bertugas</label><input type="text" id="profStation" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" required></div>
+                                    <div><label class="text-xs font-semibold text-gray-600 mb-1 block">E-mel Rasmi</label><input type="email" id="profEmail" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm bg-gray-100 text-gray-500 cursor-not-allowed" required disabled></div>
+                                    <div><label class="text-xs font-semibold text-gray-600 mb-1 block">No Telefon</label><input type="tel" id="profPhone" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" required></div>
+                                    <div><label class="text-xs font-semibold text-gray-600 mb-1 block">Kata Laluan</label><input type="text" id="profPass" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" required></div>
+                                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 transition-colors text-white py-3 rounded-xl text-sm font-semibold mt-5 shadow-md active:scale-95">Simpan Profil</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Bahagian Admin -->
+                        <div id="adminSettingsSection" class="hidden space-y-6">
+                            <!-- Tetapan Sistem -->
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
+                                <h3 class="font-bold text-gray-800 mb-4 flex items-center text-sm"><i data-lucide="settings" class="w-4 h-4 mr-2 text-red-600"></i> Kawalan Sistem Database</h3>
+                                <form id="appSettingsForm" class="space-y-4">
+                                    <div>
+                                        <label class="text-xs font-semibold text-gray-600 mb-1 block">Nama Sistem</label>
+                                        <input type="text" id="setAppName" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all" required>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-semibold text-gray-600 mb-1 block">URL Logo Gambar</label>
+                                        <input type="url" id="setAppLogo" placeholder="https://..." class="w-full border border-gray-200 rounded-xl p-2.5 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                                    </div>
+                                    
+                                    <div class="pt-4 border-t border-gray-100">
+                                        <label class="text-xs font-bold text-blue-700 mb-1 flex items-center"><i data-lucide="database" class="w-3.5 h-3.5 mr-1"></i> URL Google Apps Script</label>
+                                        <input type="url" id="setGasUrl" placeholder="https://script.google.com/macros/s/..." class="w-full border border-blue-200 rounded-xl p-2.5 text-sm bg-blue-50/30 text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                                        <button type="button" onclick="syncDatabase()" class="mt-2 w-full bg-blue-50 text-blue-700 px-3 py-2.5 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-200 shadow-sm flex justify-center items-center active:scale-95">
+                                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 mr-1.5" id="syncIcon"></i> Uji & Segerak Data
+                                        </button>
+                                    </div>
+                                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 transition-colors text-white py-3 rounded-xl text-sm font-semibold shadow-md active:scale-95">Simpan Konfigurasi</button>
+                                </form>
+                            </div>
+
+                            <!-- Urus Pengguna -->
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 relative overflow-hidden flex flex-col h-[400px]">
+                                <div class="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="font-bold text-gray-800 flex items-center text-sm"><i data-lucide="users" class="w-4 h-4 mr-2 text-red-600"></i> Senarai Pengguna</h3>
+                                    <div class="flex space-x-1">
+                                        <button onclick="syncUsersOnly()" type="button" class="p-1.5 bg-gray-50 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors" title="Refresh">
+                                            <i data-lucide="refresh-cw" class="w-4 h-4" id="syncUserIcon"></i>
+                                        </button>
+                                        <button onclick="openAddUserModal()" type="button" class="p-1.5 bg-gray-50 text-gray-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors" title="Tambah Pengguna">
+                                            <i data-lucide="user-plus" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="adminUserList" class="space-y-2 overflow-y-auto custom-scrollbar flex-1 pr-1">
+                                    <!-- Senarai Pengguna -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Chatbot Edge AI -->
+                <div id="tab-chatbot" class="flex flex-col h-full animate-slide-in-right hidden bg-white md:rounded-2xl md:shadow-sm md:border md:border-gray-100 md:m-4 md:max-w-4xl md:mx-auto">
+                    <div class="bg-gradient-to-r from-indigo-700 to-blue-600 p-4 text-white flex items-center shadow-md z-10 md:rounded-t-2xl">
+                        <div class="bg-white/20 p-2.5 rounded-xl mr-3 backdrop-blur-sm border border-white/20">
+                            <i data-lucide="bot" class="w-6 h-6"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h2 class="font-bold text-lg leading-tight">PKG Edge AI</h2>
+                            <p class="text-xs text-blue-100 flex items-center mt-0.5">
+                                <span class="w-2 h-2 rounded-full bg-green-400 mr-1.5 animate-pulse shadow-[0_0_5px_#4ade80]"></span> Pintar & Responsif
+                            </p>
+                        </div>
+                        <button onclick="switchTab('dashboard')" class="md:hidden p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <div id="chatMessages" class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-4 bg-gray-50/50 pb-6">
+                        <div class="flex justify-start">
+                            <div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm bg-white border border-gray-100 text-gray-800 rounded-tl-none">
+                                <p class="text-sm leading-relaxed">Salam sejahtera. Saya Pembantu AI PKG Sarawak. Anda boleh bertanyakan tentang <b>status tugas</b>, <b>program terkini</b>, atau tanya jadual <b>hari ini</b>.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-white border-t border-gray-100 md:rounded-b-2xl">
+                        <form id="chatForm" class="flex items-center bg-gray-50 border border-gray-200 rounded-2xl p-1.5 pl-4 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all shadow-inner">
+                            <input type="text" id="chatInput" autocomplete="off" placeholder="Tanya AI sesuatu..." 
+                                class="flex-1 bg-transparent py-2.5 text-sm focus:outline-none text-gray-700">
+                            <button type="submit" id="chatSubmitBtn" disabled
+                                class="bg-blue-600 text-white p-3 rounded-xl ml-2 disabled:opacity-50 disabled:bg-gray-300 transition-colors active:scale-95 shadow-md">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
                         </form>
                     </div>
-
-                    <!-- Urus Pengguna (Admin Only) -->
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 border-l-4 border-l-red-500">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="font-semibold text-gray-800 flex items-center"><i data-lucide="users" class="w-4 h-4 mr-2 text-red-600"></i> Urus Pengguna</h3>
-                            <div class="flex space-x-2">
-                                <button onclick="syncUsersOnly()" type="button" class="text-xs bg-blue-50 text-blue-600 px-2.5 py-1.5 rounded-lg font-bold hover:bg-blue-100 transition-colors flex items-center">
-                                    <i data-lucide="refresh-cw" class="w-3 h-3 mr-1" id="syncUserIcon"></i> Sync
-                                </button>
-                                <button onclick="openAddUserModal()" type="button" class="text-xs bg-red-50 text-red-600 px-2.5 py-1.5 rounded-lg font-bold hover:bg-red-100 transition-colors flex items-center">
-                                    <i data-lucide="user-plus" class="w-3 h-3 mr-1"></i> Tambah
-                                </button>
-                            </div>
-                        </div>
-                        <p class="text-xs text-gray-500 mb-4">Uruskan rekod dan peranan pengguna sistem.</p>
-                        <div id="adminUserList" class="space-y-3 mt-4">
-                            <!-- Senarai Pengguna dijana oleh JS -->
-                        </div>
-                    </div>
                 </div>
-            </div>
+            </main>
 
-            <!-- Tab Chatbot Edge AI -->
-            <div id="tab-chatbot" class="flex flex-col h-[calc(100vh-80px)] animate-slide-up hidden bg-white">
-                <div class="bg-gradient-to-r from-blue-700 to-blue-600 p-4 text-white flex items-center shadow-md z-10 sticky top-0">
-                    <div class="bg-white/20 p-2 rounded-full mr-3 backdrop-blur-sm">
-                        <i data-lucide="bot" class="w-6 h-6"></i>
-                    </div>
-                    <div class="flex-1">
-                        <h2 class="font-bold text-lg leading-tight">PKG Edge AI</h2>
-                        <p class="text-xs text-blue-100 flex items-center mt-0.5">
-                            <span class="w-2 h-2 rounded-full bg-green-400 mr-1.5 animate-pulse"></span> Dalam Talian
-                        </p>
-                    </div>
-                    <button onclick="switchTab('dashboard')" class="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
-                        <i data-lucide="x" class="w-5 h-5"></i>
+            <!-- NAVBAR BAWAH MOBILE (Hidden on Desktop) -->
+            <nav id="bottomNav" class="md:hidden absolute bottom-0 w-full bg-white border-t border-gray-100 px-6 py-2 flex justify-between items-center pb-safe z-20 hidden shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
+                <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center p-2 text-blue-600 transition-colors" data-target="dashboard">
+                    <i data-lucide="home" class="w-6 h-6 mb-1"></i>
+                    <span class="text-[10px] font-medium">Utama</span>
+                </button>
+                <button onclick="switchTab('calendar')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-blue-600 transition-colors" data-target="calendar">
+                    <i data-lucide="calendar" class="w-6 h-6 mb-1"></i>
+                    <span class="text-[10px] font-medium">Kalendar</span>
+                </button>
+                
+                <div class="relative -top-6">
+                    <button onclick="switchTab('chatbot')" class="w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl transition-transform transform hover:scale-105 active:scale-95 bg-gradient-to-tr from-blue-600 to-indigo-600 border-4 border-white">
+                        <i data-lucide="bot" class="w-6 h-6 text-white"></i>
                     </button>
                 </div>
 
-                <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 pb-32">
-                    <!-- Mesej aluan -->
-                    <div class="flex justify-start">
-                        <div class="max-w-[85%] rounded-2xl p-3 shadow-sm bg-white border border-gray-100 text-gray-800 rounded-tl-none">
-                            <p class="text-sm leading-relaxed">Salam sejahtera. Saya Pembantu AI PKG Sarawak. Anda boleh bertanyakan tentang <b>status tugas</b>, <b>program terkini</b>, atau semak <b>checklist</b> hari ini.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Input Chat -->
-                <div class="absolute bottom-20 w-full px-4 pt-2 pb-4 bg-gradient-to-t from-white via-white to-transparent">
-                    <form id="chatForm" class="flex items-center bg-white border border-gray-200 rounded-full p-1 pl-4 shadow-lg">
-                        <input type="text" id="chatInput" autocomplete="off" placeholder="Tanya AI sesuatu..." 
-                            class="flex-1 bg-transparent py-2 text-sm focus:outline-none text-gray-700">
-                        <button type="submit" id="chatSubmitBtn" disabled
-                            class="bg-blue-600 text-white p-2.5 rounded-full ml-2 disabled:opacity-50 disabled:bg-gray-300 transition-colors active:scale-95">
-                            <i data-lucide="send" class="w-4 h-4"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </main>
-
-        <!-- ================= MODAL TAMBAH DATA (KALENDAR) ================= -->
-        <div id="addModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-end animate-fade-in backdrop-blur-sm">
-            <div class="bg-white rounded-t-3xl p-6 animate-slide-up w-full max-w-md mx-auto max-h-[85vh] overflow-y-auto shadow-2xl border-t border-gray-100">
-                <div class="flex justify-between items-center mb-5">
-                    <h3 class="text-lg font-bold text-gray-800">Tambah Tugasan</h3>
-                    <button type="button" onclick="closeAddModal()" class="p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 transition-colors">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <form id="addDataForm" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Tajuk / Tugasan</label>
-                        <input type="text" id="addTitle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="Masukkan tajuk tugasan">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Tarikh (YYYY-MM-DD)</label>
-                        <input type="date" id="addDate" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Pautan Rujukan (URL)</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i data-lucide="link" class="text-gray-400 w-4 h-4"></i>
-                            </div>
-                            <input type="url" id="addLink" class="w-full pl-9 border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="https://...">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Muat Naik PDF Rujukan</label>
-                        <input type="file" id="addPdf" accept="application/pdf" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm text-gray-600 bg-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 transition-colors">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Catatan / Maklumat Berkaitan</label>
-                        <textarea id="addNotes" rows="3" class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="Masukkan catatan tambahan jika ada..."></textarea>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-medium py-3.5 rounded-xl hover:bg-blue-700 transition-transform active:scale-95 mt-4 shadow-md flex justify-center items-center">
-                        <i data-lucide="save" class="w-4 h-4 mr-2"></i> Simpan Tugasan
-                    </button>
-                </form>
-            </div>
+                <button onclick="switchTab('links')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-blue-600 transition-colors" data-target="links">
+                    <i data-lucide="link" class="w-6 h-6 mb-1"></i>
+                    <span class="text-[10px] font-medium">Pautan</span>
+                </button>
+                <button onclick="switchTab('settings')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-blue-600 transition-colors" data-target="settings">
+                    <i data-lucide="settings" class="w-6 h-6 mb-1"></i>
+                    <span class="text-[10px] font-medium">Tetapan</span>
+                </button>
+            </nav>
         </div>
+    </div>
 
-        <!-- ================= MODAL TAMBAH PAUTAN ================= -->
-        <div id="addLinkModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-end animate-fade-in backdrop-blur-sm">
-            <div class="bg-white rounded-t-3xl p-6 animate-slide-up w-full max-w-md mx-auto shadow-2xl border-t border-gray-100">
-                <div class="flex justify-between items-center mb-5">
-                    <h3 class="text-lg font-bold text-gray-800">Tambah Pautan Baru</h3>
-                    <button type="button" onclick="closeAddLinkModal()" class="p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 transition-colors">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <form id="addLinkForm" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Tajuk Pautan</label>
-                        <input type="text" id="addLinkTitle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="Cth: Sistem e-Operasi">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Pautan (URL)</label>
-                        <input type="url" id="addLinkUrl" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="https://...">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Penerangan Ringkas</label>
-                        <textarea id="addLinkDesc" rows="2" class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="Penerangan ringkas kegunaan pautan ini"></textarea>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-medium py-3.5 rounded-xl hover:bg-blue-700 transition-transform active:scale-95 mt-4 shadow-md flex justify-center items-center">
-                        <i data-lucide="save" class="w-4 h-4 mr-2"></i> Simpan Pautan
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- ================= MODAL TAMBAH PENGGUNA (ADMIN) ================= -->
-        <div id="addUserModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-end animate-fade-in backdrop-blur-sm">
-            <div class="bg-white rounded-t-3xl p-6 animate-slide-up w-full max-w-md mx-auto max-h-[85vh] overflow-y-auto shadow-2xl border-t border-gray-100">
-                <div class="flex justify-between items-center mb-5">
-                    <h3 class="text-lg font-bold text-gray-800">Daftar Pengguna Baru</h3>
-                    <button type="button" onclick="closeAddUserModal()" class="p-1.5 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 transition-colors">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                <form id="addUserForm" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Nama Penuh</label>
-                        <input type="text" id="newUserName" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">E-mel Rasmi (ID Log Masuk)</label>
-                        <input type="email" id="newUserEmail" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Stesen Bertugas</label>
-                        <input type="text" id="newUserStation" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">No Telefon</label>
-                            <input type="tel" id="newUserPhone" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Kata Laluan</label>
-                            <input type="text" id="newUserPassword" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Peranan Sistem</label>
-                        <select id="newUserRole" class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 text-gray-700">
-                            <option value="Pengguna">Pengguna Biasa</option>
-                            <option value="Admin">Pentadbir (Admin)</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="w-full bg-red-600 text-white font-medium py-3.5 rounded-xl hover:bg-red-700 transition-transform active:scale-95 mt-4 shadow-md flex justify-center items-center">
-                        <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i> Daftar & Jana ID
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- ================= NAVBAR BAWAH ================= -->
-        <nav id="bottomNav" class="absolute bottom-0 w-full bg-white border-t border-gray-100 px-6 py-2 flex justify-between items-center pb-safe z-20 hidden shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-            <button onclick="switchTab('dashboard')" class="nav-btn flex flex-col items-center p-2 text-blue-600 transition-colors" data-target="dashboard">
-                <i data-lucide="home" class="w-6 h-6 mb-1"></i>
-                <span class="text-[10px] font-medium">Utama</span>
-            </button>
-            <button onclick="switchTab('calendar')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-gray-600 transition-colors" data-target="calendar">
-                <i data-lucide="calendar" class="w-6 h-6 mb-1"></i>
-                <span class="text-[10px] font-medium">Kalendar</span>
-            </button>
-            
-            <!-- Butang Chatbot Terapung -->
-            <div class="relative -top-6">
-                <button onclick="switchTab('chatbot')" class="w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-transform transform hover:scale-105 active:scale-95 bg-gradient-to-tr from-blue-600 to-indigo-600 border-4 border-white">
-                    <i data-lucide="bot" class="w-6 h-6 text-white"></i>
+    <!-- ================= MODAL TAMBAH DATA (KALENDAR) ================= -->
+    <div id="addModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-end md:justify-center items-center animate-fade-in backdrop-blur-sm px-4">
+        <div class="bg-white rounded-t-3xl md:rounded-2xl p-6 md:p-8 animate-slide-up w-full max-w-md mx-auto max-h-[85vh] md:max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl border-t md:border border-gray-100">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Tambah Tugasan</h3>
+                <button type="button" onclick="closeAddModal()" class="p-2 bg-gray-50 rounded-full text-gray-500 hover:bg-gray-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
+            <form id="addDataForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Tajuk / Tugasan</label>
+                    <input type="text" id="addTitle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all" placeholder="Masukkan tajuk tugasan">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Tarikh</label>
+                    <input type="date" id="addDate" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Pautan Rujukan (URL)</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="link" class="text-gray-400 w-4 h-4 group-focus-within:text-blue-500 transition-colors"></i>
+                        </div>
+                        <input type="url" id="addLink" class="w-full pl-9 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all" placeholder="https://...">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Muat Naik PDF Rujukan</label>
+                    <input type="file" id="addPdf" accept="application/pdf" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm text-gray-600 bg-gray-50 focus:bg-white transition-all file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Catatan Tambahan</label>
+                    <textarea id="addNotes" rows="3" class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all custom-scrollbar" placeholder="Masukkan maklumat berkaitan jika ada..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition-transform active:scale-95 mt-6 shadow-md flex justify-center items-center">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i> Simpan Tugasan
+                </button>
+            </form>
+        </div>
+    </div>
 
-            <button onclick="switchTab('links')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-gray-600 transition-colors" data-target="links">
-                <i data-lucide="link" class="w-6 h-6 mb-1"></i>
-                <span class="text-[10px] font-medium">Pautan</span>
-            </button>
-            <button onclick="switchTab('settings')" class="nav-btn flex flex-col items-center p-2 text-gray-400 hover:text-gray-600 transition-colors" data-target="settings">
-                <i data-lucide="settings" class="w-6 h-6 mb-1"></i>
-                <span class="text-[10px] font-medium">Tetapan</span>
-            </button>
-        </nav>
+    <!-- ================= MODAL TAMBAH PAUTAN ================= -->
+    <div id="addLinkModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-end md:justify-center items-center animate-fade-in backdrop-blur-sm px-4">
+        <div class="bg-white rounded-t-3xl md:rounded-2xl p-6 md:p-8 animate-slide-up w-full max-w-md mx-auto shadow-2xl border-t md:border border-gray-100">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Tambah Pautan Baru</h3>
+                <button type="button" onclick="closeAddLinkModal()" class="p-2 bg-gray-50 rounded-full text-gray-500 hover:bg-gray-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="addLinkForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Tajuk Pautan</label>
+                    <input type="text" id="addLinkTitle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all" placeholder="Cth: Sistem e-Operasi">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Pautan (URL)</label>
+                    <input type="url" id="addLinkUrl" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all" placeholder="https://...">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Penerangan Ringkas</label>
+                    <textarea id="addLinkDesc" rows="2" class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all custom-scrollbar" placeholder="Kegunaan pautan ini..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition-transform active:scale-95 mt-6 shadow-md flex justify-center items-center">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i> Simpan Pautan
+                </button>
+            </form>
+        </div>
+    </div>
 
+    <!-- ================= MODAL TAMBAH PENGGUNA (ADMIN) ================= -->
+    <div id="addUserModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-end md:justify-center items-center animate-fade-in backdrop-blur-sm px-4">
+        <div class="bg-white rounded-t-3xl md:rounded-2xl p-6 md:p-8 animate-slide-up w-full max-w-md mx-auto max-h-[85vh] md:max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl border-t md:border border-gray-100">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Daftar Pengguna</h3>
+                <button type="button" onclick="closeAddUserModal()" class="p-2 bg-gray-50 rounded-full text-gray-500 hover:bg-gray-200 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="addUserForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Nama Penuh</label>
+                    <input type="text" id="newUserName" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">E-mel Rasmi</label>
+                    <input type="email" id="newUserEmail" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Stesen Bertugas</label>
+                    <input type="text" id="newUserStation" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">No Telefon</label>
+                        <input type="tel" id="newUserPhone" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Kata Laluan</label>
+                        <input type="text" id="newUserPassword" required class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wider">Peranan Sistem</label>
+                    <select id="newUserRole" class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-gray-50 focus:bg-white transition-all text-gray-700 cursor-pointer">
+                        <option value="Pengguna">Pengguna Biasa</option>
+                        <option value="Admin">Pentadbir (Admin)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-red-600 text-white font-bold py-3.5 rounded-xl hover:bg-red-700 transition-transform active:scale-95 mt-6 shadow-md flex justify-center items-center">
+                    <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i> Daftar Sistem
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- ================= LOGIK JAVASCRIPT ================= -->
@@ -545,40 +654,30 @@
                 purpose: "any maskable"
             }]
         };
-        
         const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
         document.getElementById('manifestLink').href = URL.createObjectURL(manifestBlob);
-
-        console.log("Aplikasi Sedia Digunakan. Sila pasang (Add to Home Screen) melalui menu pelayar anda.");
 
         // Inisialisasi Ikon Lucide
         lucide.createIcons();
 
         // --- DATA MOCKUP & STATE PENGGUNA ---
         let currentUser = null;
-        let currentDateStr = new Date().toISOString().split('T')[0]; // Dapatkan tarikh sebenar sistem
+        let currentDateStr = new Date().toISOString().split('T')[0]; 
         let selectedDate = currentDateStr; 
         
-        // URL Pangkalan Data (Google Sheets) dimasukkan secara lalai (default)
         let gasEndpointUrl = localStorage.getItem('pkg_gas_url') || 'https://script.google.com/macros/s/AKfycbwBkETtFzcceUu83o_2FeNlLJGfTmx3gmLFJJpSjoVpPMk03tahHX0hfUAGHaxZQVi7/exec'; 
 
-        let appSettings = {
-            appName: 'PKG Sarawak',
-            logoUrl: ''
-        };
+        let appSettings = { appName: 'PKG Sarawak', logoUrl: '' };
 
-        // Data dikosongkan (Keluarkan Mock Data). Hanya 1 Admin dibiarkan sebagai 'backdoor' keselamatan.
-        let usersData = [
-            { id: 'admin1', name: 'Mohd Shahrol', station: 'PKG Sarawak', email: 'mohd.shahrol@moe.gov.my', phone: '012-3456789', password: 'password', role: 'Admin' }
-        ];
-
+        let usersData = [{ id: 'admin1', name: 'Mohd Shahrol', station: 'PKG Sarawak', email: 'mohd.shahrol@moe.gov.my', phone: '012-3456789', password: 'password', role: 'Admin' }];
         let linksRepo = [];
         let todos = [];
         let programs = [];
         let checklists = [];
 
-        // Memaparkan tarikh semasa di Dashboard
-        document.getElementById('currentDateDisplayDashboard').innerText = new Date().toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric' });
+        // Tarikh Dashboard Desktop Format
+        const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('currentDateDisplayDashboard').innerText = new Date().toLocaleDateString('ms-MY', optionsDate);
 
         // --- SISTEM ASYNC / CRUD KE GOOGLE SHEETS ---
         async function apiCall(action, table, data = null) {
@@ -597,45 +696,28 @@
             }
         }
 
-        // Fungsi khas untuk memproses dan membersihkan data pengguna (Auto-Generate ID & Role)
         function processUsersData(rawUsers) {
             return rawUsers.map((u, index) => {
-                let isModified = false;
-                // Jika Admin masukkan dalam Google Sheet tanpa ID, jana ID secara automatik
-                if (!u.id || String(u.id).trim() === '') {
-                    u.id = 'PKG' + Date.now() + index;
-                    isModified = true;
-                }
-                // Jika ruangan Role kosong, tetapkan sebagai Pengguna Biasa
-                if (!u.role || String(u.role).trim() === '') {
-                    u.role = 'Pengguna';
-                    isModified = true;
-                }
+                if (!u.id || String(u.id).trim() === '') u.id = 'PKG' + Date.now() + index;
+                if (!u.role || String(u.role).trim() === '') u.role = 'Pengguna';
                 return u;
             });
         }
 
         async function syncDatabase() {
             const tempUrl = document.getElementById('setGasUrl').value.trim();
-            if(!tempUrl) {
-                showToast("Sila masukkan URL Google Apps Script dahulu", "error");
-                return;
-            }
+            if(!tempUrl) return showToast("Sila masukkan URL Google Apps Script dahulu", "error");
             
             gasEndpointUrl = tempUrl;
             localStorage.setItem('pkg_gas_url', gasEndpointUrl);
             
             const syncIcon = document.getElementById('syncIcon');
             syncIcon.classList.add('animate-spin');
-            
             showToast("Menyegerak dari pangkalan data...", "info");
             
             const dbData = await apiCall('readAll', null);
-            
             if(dbData) {
-                if(dbData.users && dbData.users.length > 0) {
-                    usersData = processUsersData(dbData.users);
-                }
+                if(dbData.users && dbData.users.length > 0) usersData = processUsersData(dbData.users);
                 if(dbData.todos) todos = dbData.todos;
                 if(dbData.programs) programs = dbData.programs;
                 if(dbData.links) linksRepo = dbData.links;
@@ -646,15 +728,13 @@
                 renderCalendar();
                 if(currentUser && currentUser.role === 'Admin') renderAdminUsers();
             } else {
-                showToast("Gagal berhubung dengan pangkalan data. Pastikan URL betul.", "error");
+                showToast("Gagal berhubung dengan pangkalan data.", "error");
             }
             syncIcon.classList.remove('animate-spin');
         }
 
-        // Fungsi khas untuk butang Sync Pengguna
         async function syncUsersOnly() {
             if(!gasEndpointUrl) return showToast("Sila tetapkan URL Database terlebih dahulu.", "error");
-            
             const syncUserIcon = document.getElementById('syncUserIcon');
             syncUserIcon.classList.add('animate-spin');
             showToast("Menyegerak pengguna dari Google Sheets...", "info");
@@ -670,15 +750,13 @@
             syncUserIcon.classList.remove('animate-spin');
         }
 
-        // --- SISTEM MINI WINDOW (MODAL CUSTOM) ---
+        // --- SISTEM MINI WINDOW ---
         function showMiniWindow(title, message, type = 'info', confirmText = 'OK', onConfirm = null, showCancel = false) {
             document.getElementById('miniWindowTitle').innerText = title;
             document.getElementById('miniWindowMessage').innerHTML = message;
             
             const iconDiv = document.getElementById('miniWindowIcon');
-            // Menukar ikon berdasarkan jenis tingkap
             iconDiv.innerHTML = `<i data-lucide="${type === 'warning' ? 'alert-triangle' : (type === 'error' ? 'alert-circle' : (type === 'file' ? 'file-text' : 'info'))}" class="w-7 h-7"></i>`;
-            
             iconDiv.className = `w-14 h-14 rounded-2xl flex items-center justify-center mb-5 mx-auto shadow-inner ${
                 type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
                 (type === 'error' ? 'bg-red-100 text-red-600' : 
@@ -687,17 +765,11 @@
 
             const btnConfirm = document.getElementById('miniWindowBtnConfirm');
             btnConfirm.innerText = confirmText;
-            btnConfirm.onclick = () => {
-                if(onConfirm) onConfirm();
-                closeMiniWindow();
-            };
+            btnConfirm.onclick = () => { if(onConfirm) onConfirm(); closeMiniWindow(); };
 
             const btnCancel = document.getElementById('miniWindowBtnCancel');
-            if(showCancel) {
-                btnCancel.classList.remove('hidden');
-            } else {
-                btnCancel.classList.add('hidden');
-            }
+            if(showCancel) btnCancel.classList.remove('hidden');
+            else btnCancel.classList.add('hidden');
 
             document.getElementById('miniWindowModal').classList.remove('hidden');
             document.getElementById('miniWindowModal').classList.add('flex');
@@ -713,15 +785,11 @@
         function showToast(message, type = 'success') {
             const toastContainer = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            
-            const bgColor = type === 'success' ? 'bg-green-600' : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
+            const bgColor = type === 'success' ? 'bg-green-600' : (type === 'error' ? 'bg-red-600' : 'bg-gray-800');
             const icon = type === 'success' ? 'check-circle' : (type === 'error' ? 'alert-circle' : 'info');
 
-            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center space-x-3 w-full max-w-sm transform transition-all duration-300 opacity-0 -translate-y-5`;
-            toast.innerHTML = `
-                <i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0"></i>
-                <span class="text-sm font-medium flex-1">${message}</span>
-            `;
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3 w-full max-w-sm transform transition-all duration-300 opacity-0 -translate-y-5`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 flex-shrink-0"></i><span class="text-sm font-medium flex-1">${message}</span>`;
             
             toastContainer.appendChild(toast);
             lucide.createIcons();
@@ -733,24 +801,19 @@
             }, 3000);
         }
 
-        // --- SISTEM PUSH NOTIFICATION (DEVICE NOTIFICATION) ---
+        // --- SISTEM PUSH NOTIFICATION ---
         function checkNotificationStatus() {
             if (!("Notification" in window)) return;
             updateNotificationUI(Notification.permission);
         }
 
         function requestNotificationPermission() {
-            if (!("Notification" in window)) {
-                showToast("Pelayar/Peranti anda tidak menyokong notifikasi.", "error");
-                return;
-            }
+            if (!("Notification" in window)) return showToast("Pelayar tidak menyokong notifikasi.", "error");
             Notification.requestPermission().then(permission => {
                 updateNotificationUI(permission);
                 if (permission === "granted") {
-                    showToast("Notifikasi berjaya diaktifkan!", "success");
+                    showToast("Notifikasi diaktifkan!", "success");
                     new Notification("Sistem PKG", { body: "Notifikasi PWA kini aktif." });
-                } else if (permission === "denied") {
-                    showToast("Anda menyekat akses notifikasi.", "error");
                 }
             });
         }
@@ -760,44 +823,36 @@
             const testBtn = document.getElementById('btnTestNotif');
             if (permission === "granted") {
                 btn.textContent = "Aktif";
-                btn.className = "bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-xs font-bold pointer-events-none";
+                btn.className = "bg-green-100 text-green-700 px-3 py-1.5 rounded-lg text-xs font-bold pointer-events-none";
                 testBtn.classList.remove('hidden');
             } else if (permission === "denied") {
                 btn.textContent = "Disekat";
-                btn.className = "bg-red-100 text-red-700 px-3 py-1.5 rounded-full text-xs font-bold pointer-events-none";
-                testBtn.classList.add('hidden');
+                btn.className = "bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-xs font-bold pointer-events-none";
             }
         }
 
         function testNotification() {
-            sendDeviceNotification("Peringatan Sistem PKG", "Ini adalah simulasi mesej masuk. Sistem notifikasi anda berfungsi dengan baik.");
+            if (Notification.permission === "granted") {
+                new Notification("Sistem PKG", { body: "Notifikasi berfungsi dengan baik.", icon: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" });
+            }
         }
 
         function sendDeviceNotification(title, bodyMsg) {
             if (Notification.permission === "granted") {
-                new Notification(title, {
-                    body: bodyMsg,
-                    icon: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                });
+                new Notification(title, { body: bodyMsg, icon: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" });
             }
         }
 
         // --- SISTEM LOG MASUK ---
         const loginForm = document.getElementById('loginForm');
         const loginView = document.getElementById('loginView');
-        const appHeader = document.getElementById('appHeader');
-        const mainContent = document.getElementById('mainContent');
-        const bottomNav = document.getElementById('bottomNav');
-        const loginError = document.getElementById('loginError');
-
+        const appView = document.getElementById('appView');
+        
         function applyAppSettings() {
             document.querySelectorAll('.app-title-display').forEach(el => el.innerText = appSettings.appName);
             document.querySelectorAll('.app-logo-display').forEach(el => {
-                if(appSettings.logoUrl) {
-                    el.innerHTML = `<img src="${appSettings.logoUrl}" class="w-full h-full object-cover rounded-lg" alt="Logo">`;
-                } else {
-                    el.innerHTML = appSettings.appName.charAt(0).toUpperCase();
-                }
+                if(appSettings.logoUrl) el.innerHTML = `<img src="${appSettings.logoUrl}" class="w-full h-full object-cover" alt="Logo">`;
+                else el.innerHTML = appSettings.appName.charAt(0).toUpperCase();
             });
         }
 
@@ -805,61 +860,57 @@
             e.preventDefault();
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passwordInput').value;
-
             const foundUser = usersData.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
 
             if (foundUser) {
                 currentUser = { ...foundUser };
+                
+                // Dinamik Greeting Berdasarkan Masa
+                const hour = new Date().getHours();
+                let timeGreeting = hour < 12 ? 'Selamat Pagi' : hour < 18 ? 'Selamat Petang' : 'Selamat Malam';
+                document.getElementById('greetingText').innerText = `${timeGreeting}, ${currentUser.name.split(' ')[0]}`;
+                
+                // Set User Info Sidebar Desktop
+                document.getElementById('userNameDesktop').innerText = currentUser.name;
+                document.getElementById('userInitialDesktop').innerText = currentUser.name.charAt(0).toUpperCase();
 
-                document.getElementById('greetingText').innerText = `Hai, ${currentUser.name.split(' ')[0]}`;
-                const badge = document.getElementById('userRoleBadge');
-                badge.innerText = currentUser.role;
+                const badgeMobile = document.getElementById('userRoleBadgeMobile');
+                const badgeDesktop = document.getElementById('userRoleBadgeDesktop');
+                badgeMobile.innerText = currentUser.role;
+                badgeDesktop.innerText = currentUser.role;
                 
                 const isAdmin = currentUser.role === 'Admin';
                 if(isAdmin) {
-                    badge.classList.remove('text-blue-600', 'bg-blue-50');
-                    badge.classList.add('text-red-600', 'bg-red-50');
+                    badgeMobile.className = 'text-[10px] font-semibold text-red-600 bg-red-50 inline-block px-1.5 rounded uppercase';
+                    badgeDesktop.className = 'text-[10px] font-bold text-red-600 uppercase tracking-wider mt-0.5';
                     document.getElementById('adminSettingsSection').classList.remove('hidden');
                 } else {
                     document.getElementById('adminSettingsSection').classList.add('hidden');
                 }
 
                 applyAppSettings();
-
                 loginView.classList.add('hidden');
-                appHeader.classList.remove('hidden');
-                mainContent.classList.remove('hidden');
-                bottomNav.classList.remove('hidden');
+                appView.classList.remove('hidden');
                 
-                // --- KATA SEMANGAT LUCU & SAPAAN KHAS ---
+                // SAPAAN KHAS MOTIVASI
                 const funnyQuotes = [
-                    "Kerja keraslah sampai jiran fikir awak main bomoh. Tapi jangan lupa rehat, kita bukan robot!",
-                    "Jangan stress sangat. Kalau kerja tak siap hari ni, kan ada esok. Kalau esok tak siap... siap sedia la kena soal jawab.",
-                    "Jadilah seperti kura-kura, biar lambat asalkan... eh tak boleh, bos nak report petang ni juga! Fighting!",
-                    "Kesihatan mental tu penting. Kalau rasa nak marah, tarik nafas panjang-panjang... lepas tu pergi makan.",
-                    "Terus semangat! Ingat, komitmen bulanan dan bil elektrik sentiasa menanti anda dengan setia.",
-                    "Kalau rasa penat bekerja, ingatlah masa anda tak berduit. Mana lagi penat? Haa, sambung buat kerja.",
-                    "Rehat sekejap. Bos tak nampak tu. Tapi jangan sampai tertidur terus pulak!",
-                    "Tugasan yang berat akan terasa ringan jika kita... suruh orang lain buat. (Gurau je, siapkan sendiri ya!)"
+                    "Kerja keraslah sampai jiran fikir awak main bomoh. Tapi jangan lupa rehat!",
+                    "Jangan stress sangat. Kalau kerja tak siap hari ni, kan ada esok.",
+                    "Kesihatan mental tu penting. Tarik nafas panjang-panjang... lepas tu pergi makan.",
+                    "Terus semangat! Ingat, bil elektrik sentiasa menanti anda dengan setia.",
+                    "Rehat sekejap. Bos tak nampak tu. Tapi jangan sampai tertidur terus pulak!"
                 ];
-                const randomQuote = funnyQuotes[Math.floor(Math.random() * funnyQuotes.length)];
-                
-                showMiniWindow(
-                    "Selamat Datang, Pasukan Hebat!", 
-                    "<div class='space-y-4'><img src='https://i.pinimg.com/originals/02/f7/e4/02f7e4be58fe95576c969783b1f4cc8f.png' alt='Motivasi' class='w-full max-h-48 object-contain mx-auto drop-shadow-md rounded-xl'><p class='text-[15px] font-bold text-blue-800 bg-blue-50 p-3 rounded-xl border border-blue-100'>Hi USTP hebat, anda memang hebat, bersabar dan jaga kesihatan mental masing-masing. Fighting!</p><p class='text-sm text-gray-600 italic bg-gray-50 p-3 rounded-xl border border-gray-100'>\"" + randomQuote + "\"</p></div>", 
-                    "info", 
-                    "Mula Bertugas"
-                );
+                showMiniWindow("Selamat Datang, Pasukan Hebat!", 
+                    `<div class='space-y-4'><img src='https://i.pinimg.com/originals/02/f7/e4/02f7e4be58fe95576c969783b1f4cc8f.png' alt='Motivasi' class='w-full max-h-40 object-contain mx-auto drop-shadow-md rounded-xl'><p class='text-[14px] font-bold text-blue-800 bg-blue-50 p-3 rounded-xl border border-blue-100'>Hi USTP hebat, anda memang hebat, bersabar dan jaga kesihatan mental masing-masing. Fighting!</p><p class='text-xs text-gray-600 italic bg-gray-50 p-3 rounded-xl border border-gray-100'>"${funnyQuotes[Math.floor(Math.random() * funnyQuotes.length)]}"</p></div>`, 
+                    "info", "Mula Bertugas");
 
                 checkNotificationStatus(); 
                 
                 if(gasEndpointUrl) {
-                    showToast("Menghubungkan ke Pangkalan Data...", "info");
+                    showToast("Menyegerakkan Pangkalan Data...", "info");
                     apiCall('readAll', null).then(dbData => {
                         if(dbData) {
-                            if(dbData.users && dbData.users.length > 0) {
-                                usersData = processUsersData(dbData.users);
-                            }
+                            if(dbData.users && dbData.users.length > 0) usersData = processUsersData(dbData.users);
                             if(dbData.todos) todos = dbData.todos;
                             if(dbData.programs) programs = dbData.programs;
                             if(dbData.links) linksRepo = dbData.links;
@@ -868,38 +919,30 @@
                         }
                     });
                 }
-                
                 renderDashboardData();
             } else {
-                loginError.classList.remove('hidden');
-                showToast("E-mel atau kata laluan tidak sah.", "error");
+                document.getElementById('loginError').classList.remove('hidden');
             }
         });
 
         function logout() {
             currentUser = null;
-            document.getElementById('emailInput').value = '';
             document.getElementById('passwordInput').value = '';
-            
-            appHeader.classList.add('hidden');
-            mainContent.classList.add('hidden');
-            bottomNav.classList.add('hidden');
+            appView.classList.add('hidden');
             loginView.classList.remove('hidden');
-            
             switchTab('dashboard'); 
         }
 
-        // --- PENGURUSAN UI & TAB ---
+        // --- PENGURUSAN TAB & RESPONSIVE NAV ---
         function switchTab(tabId) {
-            document.querySelectorAll('main > div').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('main#mainContent > div').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             
-            if(tabId === 'chatbot') {
-                appHeader.classList.add('hidden');
-            } else {
-                appHeader.classList.remove('hidden');
-            }
+            // Mobile Header Visibility
+            if(tabId === 'chatbot') document.getElementById('appHeader').classList.add('hidden');
+            else document.getElementById('appHeader').classList.remove('hidden');
 
+            // Mobile Nav UI
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 if(btn.dataset.target === tabId) {
                     btn.classList.remove('text-gray-400');
@@ -910,46 +953,41 @@
                 }
             });
 
-            if(tabId === 'calendar') { renderCalendar(); }
+            // Desktop Nav UI
+            document.querySelectorAll('.nav-btn-desktop').forEach(btn => {
+                if(btn.dataset.target === tabId) {
+                    btn.classList.add('bg-blue-50', 'text-blue-700', 'font-semibold');
+                    btn.classList.remove('text-gray-600', 'font-medium', 'hover:bg-gray-50');
+                } else {
+                    btn.classList.remove('bg-blue-50', 'text-blue-700', 'font-semibold');
+                    btn.classList.add('text-gray-600', 'font-medium', 'hover:bg-gray-50');
+                }
+            });
+
+            if(tabId === 'calendar') renderCalendar(); 
             if(tabId === 'programs') renderPrograms();
             if(tabId === 'links') renderLinks();
             if(tabId === 'settings') renderSettings();
             if(tabId === 'chatbot') scrollToBottom();
         }
 
-        // --- PENGURUSAN BORANG TAMBAH DATA (KALENDAR) ---
+        // --- FUNGSI TUGASAN & KALENDAR ---
         const addModal = document.getElementById('addModal');
         const addDataForm = document.getElementById('addDataForm');
 
-        function openAddModal() {
-            document.getElementById('addDate').value = selectedDate;
-            addModal.classList.remove('hidden');
-            addModal.classList.add('flex');
-        }
-
-        function closeAddModal() {
-            addModal.classList.add('hidden');
-            addModal.classList.remove('flex');
-            addDataForm.reset();
-        }
+        function openAddModal() { document.getElementById('addDate').value = selectedDate; addModal.classList.remove('hidden'); addModal.classList.add('flex'); }
+        function closeAddModal() { addModal.classList.add('hidden'); addModal.classList.remove('flex'); addDataForm.reset(); }
 
         addDataForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const title = document.getElementById('addTitle').value;
-            const date = document.getElementById('addDate').value;
-            const link = document.getElementById('addLink').value;
-            const pdfFile = document.getElementById('addPdf').files[0];
-            const notes = document.getElementById('addNotes').value;
-
             const newTodo = {
                 id: Date.now(),
-                text: title,
-                completed: false,
-                priority: 'medium',
-                date: date,
-                link: link,
-                pdf: pdfFile ? pdfFile.name : '',
-                notes: notes,
+                text: document.getElementById('addTitle').value,
+                completed: false, priority: 'medium',
+                date: document.getElementById('addDate').value,
+                link: document.getElementById('addLink').value,
+                pdf: document.getElementById('addPdf').files[0] ? document.getElementById('addPdf').files[0].name : '',
+                notes: document.getElementById('addNotes').value,
                 addedBy: currentUser.name
             };
 
@@ -957,17 +995,13 @@
             if(gasEndpointUrl) apiCall('create', 'Todos', newTodo);
 
             closeAddModal();
-            
-            selectedDate = date; 
+            selectedDate = newTodo.date; 
             renderDashboardData();
+            if(!document.getElementById('tab-calendar').classList.contains('hidden')) renderCalendar();
             
-            if(!document.getElementById('tab-calendar').classList.contains('hidden')) {
-                renderCalendar();
-            }
-            
-            addMessage(`Sistem: Rekod kalendar "${title}" berjaya disimpan untuk tarikh ${date}.`, 'system');
-            showToast("Tugasan berjaya ditambah ke kalendar.", "success");
-            sendDeviceNotification("Kalendar Baru Disimpan", `Tugasan: "${title}" telah dijadualkan pada ${date}.`);
+            addMessage(`Sistem: Rekod kalendar "${newTodo.text}" disimpan.`, 'system');
+            showToast("Tugasan berjaya ditambah.", "success");
+            sendDeviceNotification("Kalendar Baru", `Tugasan: "${newTodo.text}" pada ${newTodo.date}.`);
         });
 
         function toggleTodo(id) {
@@ -975,597 +1009,236 @@
             if(index > -1) {
                 todos[index].completed = !todos[index].completed;
                 if(gasEndpointUrl) apiCall('update', 'Todos', todos[index]);
-                
                 renderDashboardData();
-                if(!document.getElementById('tab-calendar').classList.contains('hidden')) {
-                    renderCalendarTodos();
-                }
+                if(!document.getElementById('tab-calendar').classList.contains('hidden')) renderCalendarTodos();
             }
         }
 
-        // --- PENGURUSAN PAUTAN (LINKS) ---
-        const addLinkModal = document.getElementById('addLinkModal');
-        const addLinkForm = document.getElementById('addLinkForm');
-
-        function openAddLinkModal() {
-            addLinkModal.classList.remove('hidden');
-            addLinkModal.classList.add('flex');
-        }
-
-        function closeAddLinkModal() {
-            addLinkModal.classList.add('hidden');
-            addLinkModal.classList.remove('flex');
-            addLinkForm.reset();
-        }
-
-        addLinkForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const title = document.getElementById('addLinkTitle').value;
-            const url = document.getElementById('addLinkUrl').value;
-            const desc = document.getElementById('addLinkDesc').value;
-
-            const newLink = {
-                id: Date.now(),
-                title, url, desc, addedBy: currentUser.name
-            };
-
-            linksRepo.push(newLink);
-            if(gasEndpointUrl) apiCall('create', 'Links', newLink);
-
-            closeAddLinkModal();
-            renderLinks();
-            
-            addMessage(`Sistem: Pautan "${title}" berjaya ditambah ke repositori.`, 'system');
-            showToast("Pautan berjaya ditambah.", "success");
-            sendDeviceNotification("Repositori Dikemaskini", `Pautan baharu "${title}" telah ditambah.`);
-        });
-
-        // --- PENGURUSAN TAMBAH PENGGUNA BARU (ADMIN) ---
-        const addUserModal = document.getElementById('addUserModal');
-        const addUserForm = document.getElementById('addUserForm');
-
-        function openAddUserModal() {
-            addUserModal.classList.remove('hidden');
-            addUserModal.classList.add('flex');
-        }
-
-        function closeAddUserModal() {
-            addUserModal.classList.add('hidden');
-            addUserModal.classList.remove('flex');
-            addUserForm.reset();
-        }
-
-        addUserForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('newUserName').value;
-            const email = document.getElementById('newUserEmail').value;
-            const station = document.getElementById('newUserStation').value;
-            const phone = document.getElementById('newUserPhone').value;
-            const password = document.getElementById('newUserPassword').value;
-            const role = document.getElementById('newUserRole').value;
-            
-            // Semak jika e-mel telah wujud
-            if(usersData.some(u => String(u.email).toLowerCase() === String(email).toLowerCase())) {
-                showMiniWindow("Pendaftaran Gagal", "E-mel ini telah didaftarkan dalam pangkalan data. Sila gunakan e-mel yang berbeza.", "error", "Tutup");
-                return;
-            }
-
-            const newUser = {
-                id: 'PKG' + Date.now(), // PENJANAAN ID AUTOMATIK
-                name: name,
-                station: station,
-                email: email,
-                phone: phone,
-                password: password,
-                role: role
-            };
-
-            usersData.push(newUser);
-            
-            // Hantar data pengguna baru ke Google Sheets
-            if(gasEndpointUrl) apiCall('create', 'Users', newUser);
-            
-            closeAddUserModal();
-            renderAdminUsers();
-            
-            showToast("Pengguna berjaya didaftarkan!", "success");
-            showMiniWindow("Pendaftaran Berjaya", `Pengguna <b>${name}</b> telah didaftarkan dengan ID: <b>${newUser.id}</b>. Maklumat ini telah dikemas kini ke dalam Google Sheets.`, "success", "OK");
-        });
-
-        function renderLinks() {
-            const html = linksRepo.map(link => `
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col hover:shadow-md transition-shadow">
-                    <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-bold text-gray-800 text-sm flex-1">${link.title}</h3>
-                        <a href="${link.url}" target="_blank" class="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors ml-2">
-                            <i data-lucide="external-link" class="w-4 h-4"></i>
-                        </a>
-                    </div>
-                    <p class="text-xs text-gray-500 mb-3">${link.desc}</p>
-                    <div class="mt-auto flex justify-between items-center pt-3 border-t border-gray-50">
-                        <span class="text-[10px] text-gray-400"><i data-lucide="user" class="w-3 h-3 inline mr-0.5"></i> ${link.addedBy}</span>
-                        <span class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded">Rujukan</span>
-                    </div>
-                </div>
-            `).join('');
-            document.getElementById('linksContainer').innerHTML = html;
-            lucide.createIcons();
-        }
-
-        // --- PENGURUSAN TETAPAN & PROFIL PENGGUNA ---
-        function renderSettings() {
-            document.getElementById('profName').value = currentUser.name;
-            document.getElementById('profStation').value = currentUser.station;
-            document.getElementById('profEmail').value = currentUser.email;
-            document.getElementById('profPhone').value = currentUser.phone;
-            document.getElementById('profPass').value = currentUser.password;
-
-            if (currentUser.role === 'Admin') {
-                document.getElementById('setAppName').value = appSettings.appName;
-                document.getElementById('setAppLogo').value = appSettings.logoUrl;
-                document.getElementById('setGasUrl').value = gasEndpointUrl;
-                renderAdminUsers();
-            }
-        }
-
-        document.getElementById('profileForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('profName').value;
-            const station = document.getElementById('profStation').value;
-            const phone = document.getElementById('profPhone').value;
-            const pass = document.getElementById('profPass').value;
-
-            // Pastikan ID dipadan dengan teliti menggunakan String comparison
-            const userIndex = usersData.findIndex(u => String(u.email) === String(currentUser.email));
-            if(userIndex > -1) {
-                usersData[userIndex].name = name;
-                usersData[userIndex].station = station;
-                usersData[userIndex].phone = phone;
-                usersData[userIndex].password = pass;
-                
-                currentUser = { ...usersData[userIndex] };
-                if(gasEndpointUrl) apiCall('update', 'Users', usersData[userIndex]);
-                
-                showToast("Profil berjaya dikemaskini!", "success");
-                document.getElementById('greetingText').innerText = `Selamat Pagi, ${currentUser.name.split(' ')[0]}`;
-                if(currentUser.role === 'Admin') renderAdminUsers();
-            }
-        });
-
-        document.getElementById('appSettingsForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            appSettings.appName = document.getElementById('setAppName').value;
-            appSettings.logoUrl = document.getElementById('setAppLogo').value;
-            applyAppSettings();
-            
-            gasEndpointUrl = document.getElementById('setGasUrl').value.trim();
-            localStorage.setItem('pkg_gas_url', gasEndpointUrl);
-            
-            showToast("Tetapan sistem berjaya disimpan!", "success");
-        });
-
-        function renderAdminUsers() {
-            const html = usersData.map(user => `
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
-                    <div>
-                        <p class="text-sm font-bold text-gray-800">${user.name}</p>
-                        <p class="text-xs text-gray-500">${user.email} &bull; ${user.station}</p>
-                        <span class="text-[10px] font-bold inline-block mt-1 px-2 py-0.5 rounded ${user.role === 'Admin' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">${user.role}</span>
-                    </div>
-                    ${user.email !== currentUser.email ? `
-                        <button onclick="toggleUserRole('${user.id}')" class="text-xs font-semibold bg-white border border-gray-300 px-3 py-1.5 rounded-md hover:bg-gray-100 transition-colors shadow-sm">
-                            Jadikan ${user.role === 'Admin' ? 'Pengguna' : 'Admin'}
-                        </button>
-                    ` : '<span class="text-xs text-gray-400 italic">Diri sendiri</span>'}
-                </div>
-            `).join('');
-            document.getElementById('adminUserList').innerHTML = html;
-        }
-
-        // TUKAR PERANAN PENGGUNA (MEMBAIKI BUG)
-        function toggleUserRole(userId) {
-            // Ditukar kepada `String` perbandingan agar serasi dengan array Google Sheets
-            const userIndex = usersData.findIndex(u => String(u.id) === String(userId));
-            if(userIndex > -1) {
-                usersData[userIndex].role = usersData[userIndex].role === 'Admin' ? 'Pengguna' : 'Admin';
-                
-                if(gasEndpointUrl) apiCall('update', 'Users', usersData[userIndex]);
-                
-                renderAdminUsers(); 
-                // Guna Mini Window untuk makluman berjaya tukar peranan
-                showMiniWindow("Kemaskini Berjaya", `Peranan pengguna <b>${usersData[userIndex].name}</b> telah ditukar kepada <b>${usersData[userIndex].role}</b>.`, "success", "Tutup");
-            }
-        }
-
-        // --- FUNGSI RENDER DATA ---
-        function renderDashboardData() {
-            const pendingTodos = todos.filter(t => !t.completed).length;
-            document.getElementById('stat-todos').innerText = pendingTodos;
-            document.getElementById('stat-programs').innerText = programs.length;
-
-            // Dapatkan tarikh hari ini tanpa mengira masa untuk perbandingan
-            const todayObj = new Date(currentDateStr);
-            todayObj.setHours(0,0,0,0);
-
-            // Susun mengikut tarikh terdekat, dan bina HTML (Jangan hilangkan yang dah selesai)
-            const todoHTML = todos.sort((a,b) => new Date(a.date) - new Date(b.date))
-                .map(todo => {
-                    const todoDateObj = new Date(todo.date);
-                    todoDateObj.setHours(0,0,0,0);
-                    
-                    let dateColorClass = 'text-blue-600 bg-blue-50 border-blue-200';
-                    let dateLabel = todo.date;
-                    let textClass = 'text-gray-800';
-                    let iconHtml = `<i data-lucide="circle" class="text-gray-300 w-5 h-5"></i>`;
-                    
-                    // Logik Pewarnaan Status Tarikh & Selesai
-                    if (todo.completed) {
-                        dateColorClass = 'text-gray-500 bg-gray-100 border-gray-200';
-                        dateLabel = `Selesai: ${todo.date}`;
-                        textClass = 'text-gray-400 line-through italic'; // Label digraykan, italic, gariskan
-                        iconHtml = `<i data-lucide="check-circle-2" class="text-green-500 w-5 h-5"></i>`;
-                    } else if (todoDateObj < todayObj) {
-                        dateColorClass = 'text-red-600 bg-red-50 border-red-200'; // Tertunggak (Merah)
-                        dateLabel = `Tertunggak: ${todo.date}`;
-                    } else if (todoDateObj.getTime() === todayObj.getTime()) {
-                        dateColorClass = 'text-orange-600 bg-orange-50 border-orange-200'; // Hari ini (Oren)
-                        dateLabel = `Hari Ini`;
-                    } else {
-                        dateColorClass = 'text-green-600 bg-green-50 border-green-200'; // Akan datang (Hijau)
-                    }
-
-                    return `
-                        <div class="flex items-start p-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition cursor-pointer" onclick="toggleTodo(${todo.id})">
-                            <div class="mr-3 mt-1.5">
-                                ${iconHtml}
-                            </div>
-                            <div class="flex-1 overflow-hidden">
-                                <p class="text-sm font-medium ${textClass} truncate pr-2">${todo.text}</p>
-                                <div class="flex items-center mt-1.5 space-x-2">
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded border flex-shrink-0 ${dateColorClass}">
-                                        <i data-lucide="calendar" class="w-3 h-3 inline mr-0.5"></i> ${dateLabel}
-                                    </span>
-                                    <span class="text-[10px] text-gray-500 truncate flex-1">
-                                        <i data-lucide="user" class="w-3 h-3 inline mr-0.5"></i> ${todo.addedBy || 'Sistem'}
-                                    </span>
-                                </div>
-                            </div>
-                            <button onclick="viewTodoDetails(${todo.id}); event.stopPropagation();" class="ml-1 mt-1 p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors flex-shrink-0" title="Lihat Info">
-                                <i data-lucide="eye" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    `;
-            }).join('') || '<p class="p-4 text-xs text-center text-gray-400">Tiada tugasan di dalam rekod.</p>';
-            
-            document.getElementById('todoListContainer').innerHTML = todoHTML;
-
-            const checklistHTML = checklists.slice(0,2).map(c => `
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-sm font-semibold text-gray-800">${c.title}</span>
-                        <span class="text-[11px] font-medium px-2 py-0.5 bg-gray-100 text-gray-600 rounded-md">${c.completedItems}/${c.items}</span>
-                    </div>
-                    <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                        <div class="bg-gradient-to-r ${c.progress === 100 ? 'from-green-500 to-green-400' : 'from-blue-600 to-blue-400'} h-2 rounded-full transition-all duration-1000 ease-out" style="width: ${c.progress}%"></div>
-                    </div>
-                </div>
-            `).join('') || '<p class="text-xs text-gray-400 p-2 text-center">Tiada status semakan buat masa ini.</p>';
-            document.getElementById('checklistContainer').innerHTML = checklistHTML;
-            
-            lucide.createIcons();
-        }
-
-        // KALENDAR DINAMIK (MEMBAIKI BUG)
-        function renderCalendar() {
-            const grid = document.getElementById('calendarGrid');
-            
-            // Ekstrak Tahun dan Bulan dari selectedDate
-            const [yearStr, monthStr, dayStr] = selectedDate.split('-');
-            const year = parseInt(yearStr);
-            const month = parseInt(monthStr) - 1; // Bulan di JS bermula dari 0
-            
-            // Dapatkan hari bermula & jumlah hari
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            // Kemas kini Tajuk Header Kalendar
-            const monthNames = ["Januari", "Februari", "Mac", "April", "Mei", "Jun", "Julai", "Ogos", "September", "Oktober", "November", "Disember"];
-            document.getElementById('calendarMonthDisplay').innerText = `${monthNames[month]} ${year}`;
-            
-            let html = '';
-            
-            // Slot kosong sebelum hari pertama bulan tersebut
-            for(let i = 0; i < firstDay; i++) {
-                html += `<div class="p-2"></div>`;
-            }
-            
-            // Plot semua hari
-            for(let i = 1; i <= daysInMonth; i++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                const isToday = dateStr === currentDateStr;
-                const isSelected = dateStr === selectedDate;
-                
-                // Pastikan format tarikh dari Google Sheets dipotong supaya sepadan (hanya ambil 10 aksara pertama atau buang T)
-                const hasEvent = todos.some(t => {
-                    const tDate = t.date ? String(t.date).split('T')[0] : '';
-                    return tDate === dateStr;
-                });
-                
-                let classes = "p-2 rounded-lg text-gray-700 flex flex-col items-center justify-center relative cursor-pointer transition-colors ";
-                
-                if (isSelected) {
-                    classes += "bg-blue-600 text-white font-bold shadow-md transform scale-105";
-                } else if (isToday) {
-                    classes += "bg-blue-50 text-blue-700 font-bold border border-blue-200";
-                } else {
-                    classes += "hover:bg-gray-100";
-                }
-
-                html += `
-                    <div class="${classes}" onclick="selectDate('${dateStr}')">
-                        <span>${i}</span>
-                        ${hasEvent && !isSelected ? `<span class="w-1.5 h-1.5 rounded-full bg-red-500 absolute bottom-1 shadow-sm"></span>` : ''}
-                        ${hasEvent && isSelected ? `<span class="w-1.5 h-1.5 rounded-full bg-white absolute bottom-1 shadow-sm"></span>` : ''}
-                    </div>
-                `;
-            }
-            grid.innerHTML = html;
-            renderCalendarTodos();
-        }
-
-        function prevMonth() {
-            const dateObj = new Date(selectedDate);
-            dateObj.setMonth(dateObj.getMonth() - 1);
-            selectedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-01`;
-            renderCalendar();
-        }
-
-        function nextMonth() {
-            const dateObj = new Date(selectedDate);
-            dateObj.setMonth(dateObj.getMonth() + 1);
-            selectedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-01`;
-            renderCalendar();
-        }
-
-        function selectDate(dateStr) {
-            selectedDate = dateStr;
-            renderCalendar();
-        }
-
-        function renderCalendarTodos() {
-            // Tapis data kalendar, pastikan ambil tarikh tanpa format masa (T)
-            const dateTodos = todos.filter(t => {
-                const tDate = t.date ? String(t.date).split('T')[0] : '';
-                return tDate === selectedDate;
-            });
-            
-            const dateObj = new Date(selectedDate);
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('selectedDateHeader').innerText = dateObj.toLocaleDateString('ms-MY', options);
-
-            if(dateTodos.length === 0) {
-                document.getElementById('fullTodoList').innerHTML = `
-                    <div class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                        <i data-lucide="calendar-x" class="w-8 h-8 text-gray-300 mx-auto mb-2"></i>
-                        <p class="text-sm text-gray-500 font-medium">Tiada rekod kalendar.</p>
-                        <p class="text-xs text-gray-400 mt-1">Tekan butang + di atas untuk menambah rekod baru.</p>
-                    </div>`;
-                lucide.createIcons();
-                return;
-            }
-
-            const html = dateTodos.map(todo => `
-                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-gray-100 flex items-start cursor-pointer hover:border-blue-300 transition-colors" onclick="toggleTodo(${todo.id})">
-                    <div class="mr-3 mt-0.5">
-                        ${todo.completed 
-                            ? `<i data-lucide="check-circle-2" class="text-green-500 w-5 h-5"></i>` 
-                            : `<i data-lucide="circle" class="text-gray-300 w-5 h-5"></i>`}
-                    </div>
-                    <div class="flex-1 overflow-hidden">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1 overflow-hidden">
-                                <p class="text-sm font-semibold truncate pr-2 ${todo.completed ? 'text-gray-400 line-through italic' : 'text-gray-800'}">${todo.text}</p>
-                                <p class="text-[10px] text-gray-500 mt-0.5 flex items-center"><i data-lucide="user" class="w-3 h-3 mr-1"></i> ${todo.addedBy || 'Sistem'}</p>
-                            </div>
-                            <button onclick="viewTodoDetails(${todo.id}); event.stopPropagation();" class="text-gray-400 hover:text-blue-600 p-1 bg-gray-50 hover:bg-blue-50 rounded-md flex-shrink-0 transition-colors" title="Lihat Info">
-                                <i data-lucide="eye" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="flex flex-wrap gap-2 mt-2">
-                            ${todo.link ? `
-                                <a href="${todo.link}" target="_blank" onclick="event.stopPropagation()" class="inline-flex items-center text-[10px] font-bold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md hover:bg-blue-100 transition-colors border border-blue-100">
-                                    <i data-lucide="external-link" class="w-3 h-3 mr-1"></i> Buka Pautan
-                                </a>
-                            ` : ''}
-                            ${todo.pdf ? `
-                                <button onclick="event.stopPropagation(); showMiniWindow('Fail Rujukan', 'Membuka fail PDF: <b>${todo.pdf}</b><br><br><span class=\\'text-xs text-gray-400\\'>Ini adalah simulasi paparan PDF dalam PWA.</span>', 'file', 'Tutup')" class="inline-flex items-center text-[10px] font-bold bg-red-50 text-red-700 px-2.5 py-1 rounded-md hover:bg-red-100 transition-colors border border-red-100 truncate max-w-full">
-                                    <i data-lucide="file-text" class="w-3 h-3 mr-1 flex-shrink-0"></i> <span class="truncate">${todo.pdf}</span>
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            document.getElementById('fullTodoList').innerHTML = html;
-            lucide.createIcons();
-        }
-
-        function renderPrograms() {
-            const html = programs.map(p => {
-                const isCompleted = p.completed;
-                const titleClass = isCompleted ? 'text-gray-400 line-through italic' : 'text-gray-800';
-                const statusClass = isCompleted ? 'text-gray-500 bg-gray-100' : 'text-blue-700 bg-blue-50';
-                
-                return `
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group cursor-pointer hover:border-blue-200 transition-colors" onclick="toggleProgram(${p.id})">
-                    <div class="w-1.5 h-full ${isCompleted ? 'bg-gray-300' : 'bg-blue-500'} absolute left-0 top-0"></div>
-                    <div class="p-4 pl-5">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] font-bold ${statusClass} px-2.5 py-1 rounded-md uppercase tracking-wider flex items-center">
-                                ${isCompleted ? '<i data-lucide="check-circle-2" class="w-3 h-3 mr-1"></i> Selesai' : p.status}
-                            </span>
-                            <div class="flex items-center">
-                                ${currentUser && currentUser.role === 'Admin' ? 
-                                    `<button class="text-gray-300 hover:text-gray-600 p-1" onclick="event.stopPropagation()"><i data-lucide="edit-2" class="w-4 h-4"></i></button>` 
-                                    : `<button class="text-gray-300 hover:text-gray-600" onclick="event.stopPropagation()"><i data-lucide="more-vertical" class="w-4 h-4"></i></button>`
-                                }
-                            </div>
-                        </div>
-                        <h3 class="font-bold ${titleClass} mb-3 text-sm leading-tight">${p.title}</h3>
-                        <div class="space-y-1.5 text-xs text-gray-500 font-medium">
-                            <div class="flex items-center"><i data-lucide="calendar" class="w-3.5 h-3.5 mr-2 opacity-70"></i> ${p.date}</div>
-                            <div class="flex items-center"><i data-lucide="map-pin" class="w-3.5 h-3.5 mr-2 opacity-70"></i> ${p.location}</div>
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
-            document.getElementById('programsContainer').innerHTML = html;
-            lucide.createIcons();
-        }
-
-        // FUNGSI TOGGLE PROGRAM
-        function toggleProgram(id) {
-            const index = programs.findIndex(p => p.id === id);
-            if(index > -1) {
-                programs[index].completed = !programs[index].completed;
-                if(gasEndpointUrl) apiCall('update', 'Programs', programs[index]);
-                if(!document.getElementById('tab-programs').classList.contains('hidden')) {
-                    renderPrograms();
-                }
-                renderDashboardData();
-            }
-        }
-
-        // FUNGSI PAPAR MAKLUMAT TUGASAN TERPERINCI (VIEW DETAILS)
         function viewTodoDetails(id) {
             const todo = todos.find(t => t.id === id);
             if(!todo) return;
-
-            const statusHTML = todo.completed 
-                ? '<span class="text-green-600 font-bold flex items-center"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 mr-1"></i> Selesai</span>' 
-                : '<span class="text-yellow-600 font-bold flex items-center"><i data-lucide="clock" class="w-3.5 h-3.5 mr-1"></i> Aktif / Tertunggak</span>';
-                
-            const notesText = todo.notes 
-                ? todo.notes.replace(/\n/g, '<br>') 
-                : '<i class="text-gray-400">Tiada catatan disertakan untuk tugasan ini.</i>';
+            const statusHTML = todo.completed ? '<span class="text-green-600 font-bold flex items-center"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 mr-1"></i> Selesai</span>' : '<span class="text-yellow-600 font-bold flex items-center"><i data-lucide="clock" class="w-3.5 h-3.5 mr-1"></i> Aktif</span>';
+            const notesText = todo.notes ? todo.notes.replace(/\n/g, '<br>') : '<i class="text-gray-400">Tiada catatan.</i>';
 
             const detailHTML = `
                 <div class="text-left space-y-3 mt-2">
-                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center">
-                        <span class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Status Semasa</span>
-                        <span class="text-sm">${statusHTML}</span>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center">
-                        <span class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Tarikh Jadual</span>
-                        <span class="text-sm font-medium text-gray-800">${todo.date}</span>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center">
-                        <span class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Dimuat Naik Oleh</span>
-                        <span class="text-sm font-medium text-gray-800">${todo.addedBy || 'Sistem'}</span>
-                    </div>
-                    <div class="bg-blue-50/50 p-3 rounded-lg border border-blue-100 max-h-32 overflow-y-auto">
-                        <p class="text-xs text-blue-800 uppercase tracking-wider mb-1.5 font-bold flex items-center"><i data-lucide="file-text" class="w-3.5 h-3.5 mr-1"></i> Catatan</p>
-                        <p class="text-sm text-gray-700 leading-relaxed">${notesText}</p>
-                    </div>
-                    ${(todo.link || todo.pdf) ? `
-                    <div class="pt-2 flex flex-col gap-2">
-                        ${todo.link ? `<a href="${todo.link}" target="_blank" class="inline-flex items-center text-xs font-bold bg-blue-100 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-200 transition-colors"><i data-lucide="external-link" class="w-4 h-4 mr-2"></i> Buka Pautan Rujukan</a>` : ''}
-                        ${todo.pdf ? `<button onclick="showToast('Simulasi memuat turun PDF: ${todo.pdf}', 'info')" class="inline-flex items-center justify-center text-xs font-bold bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Muat Turun ${todo.pdf}</button>` : ''}
-                    </div>` : ''}
-                </div>
-            `;
-
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center"><span class="text-xs text-gray-500 uppercase font-semibold">Status</span><span class="text-sm">${statusHTML}</span></div>
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center"><span class="text-xs text-gray-500 uppercase font-semibold">Tarikh</span><span class="text-sm font-medium text-gray-800">${todo.date}</span></div>
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center"><span class="text-xs text-gray-500 uppercase font-semibold">Oleh</span><span class="text-sm font-medium text-gray-800">${todo.addedBy || 'Sistem'}</span></div>
+                    <div class="bg-blue-50/50 p-3 rounded-lg border border-blue-100 max-h-32 overflow-y-auto custom-scrollbar"><p class="text-xs text-blue-800 uppercase mb-1 font-bold flex items-center"><i data-lucide="file-text" class="w-3.5 h-3.5 mr-1"></i> Catatan</p><p class="text-sm text-gray-700 leading-relaxed">${notesText}</p></div>
+                    ${(todo.link || todo.pdf) ? `<div class="pt-2 flex flex-col gap-2">${todo.link ? `<a href="${todo.link}" target="_blank" class="inline-flex items-center text-xs font-bold bg-blue-100 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-200 transition-colors"><i data-lucide="external-link" class="w-4 h-4 mr-2"></i> Buka Pautan</a>` : ''}${todo.pdf ? `<button onclick="showToast('Simulasi muat turun: ${todo.pdf}', 'info')" class="inline-flex justify-center text-xs font-bold bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Muat Turun ${todo.pdf}</button>` : ''}</div>` : ''}
+                </div>`;
             showMiniWindow(todo.text, detailHTML, "info", "Tutup");
         }
 
-        // --- SIMULASI EDGE AI CHATBOT ---
-        const chatInput = document.getElementById('chatInput');
-        const chatForm = document.getElementById('chatForm');
-        const chatSubmitBtn = document.getElementById('chatSubmitBtn');
-        const chatMessages = document.getElementById('chatMessages');
+        // --- PENGURUSAN PAUTAN & PENGGUNA (ADMIN) ---
+        const addLinkModal = document.getElementById('addLinkModal');
+        const addUserModal = document.getElementById('addUserModal');
+        
+        function openAddLinkModal() { addLinkModal.classList.remove('hidden'); addLinkModal.classList.add('flex'); }
+        function closeAddLinkModal() { addLinkModal.classList.add('hidden'); addLinkModal.classList.remove('flex'); document.getElementById('addLinkForm').reset(); }
+        function openAddUserModal() { addUserModal.classList.remove('hidden'); addUserModal.classList.add('flex'); }
+        function closeAddUserModal() { addUserModal.classList.add('hidden'); addUserModal.classList.remove('flex'); document.getElementById('addUserForm').reset(); }
 
-        chatInput.addEventListener('input', () => {
-            chatSubmitBtn.disabled = chatInput.value.trim() === '';
+        document.getElementById('addLinkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newLink = { id: Date.now(), title: document.getElementById('addLinkTitle').value, url: document.getElementById('addLinkUrl').value, desc: document.getElementById('addLinkDesc').value, addedBy: currentUser.name };
+            linksRepo.push(newLink);
+            if(gasEndpointUrl) apiCall('create', 'Links', newLink);
+            closeAddLinkModal(); renderLinks(); showToast("Pautan berjaya ditambah.", "success");
         });
 
-        function scrollToBottom() {
-            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('newUserEmail').value;
+            if(usersData.some(u => String(u.email).toLowerCase() === String(email).toLowerCase())) return showMiniWindow("Ralat", "E-mel ini telah wujud.", "error", "Tutup");
+            
+            const newUser = { id: 'PKG' + Date.now(), name: document.getElementById('newUserName').value, station: document.getElementById('newUserStation').value, email: email, phone: document.getElementById('newUserPhone').value, password: document.getElementById('newUserPassword').value, role: document.getElementById('newUserRole').value };
+            usersData.push(newUser);
+            if(gasEndpointUrl) apiCall('create', 'Users', newUser);
+            
+            closeAddUserModal(); renderAdminUsers(); showToast("Pengguna didaftarkan!", "success");
+        });
+
+        function toggleUserRole(userId) {
+            const idx = usersData.findIndex(u => String(u.id) === String(userId));
+            if(idx > -1) {
+                usersData[idx].role = usersData[idx].role === 'Admin' ? 'Pengguna' : 'Admin';
+                if(gasEndpointUrl) apiCall('update', 'Users', usersData[idx]);
+                renderAdminUsers(); showToast("Peranan ditukar", "success");
+            }
         }
 
-        function addMessage(text, sender) {
-            const isUser = sender === 'user';
-            const isSystem = sender === 'system';
-            let html = '';
-            
-            if (isSystem) {
-                html = `<div class="flex justify-center animate-fade-in my-3"><div class="bg-gray-200/60 text-gray-600 text-[11px] font-medium px-4 py-1.5 rounded-full text-center flex items-center"><i data-lucide="info" class="w-3 h-3 mr-1.5"></i> ${text}</div></div>`;
-            } else {
-                html = `<div class="flex ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in"><div class="max-w-[85%] rounded-2xl p-3 shadow-sm ${isUser ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none'}"><p class="text-sm leading-relaxed">${text}</p></div></div>`;
-            }
-            chatMessages.insertAdjacentHTML('beforeend', html);
-            scrollToBottom();
+        // --- RENDER FUNCTIONS ---
+        function renderDashboardData() {
+            document.getElementById('stat-todos').innerText = todos.filter(t => !t.completed).length;
+            document.getElementById('stat-programs').innerText = programs.length;
+            const todayObj = new Date(currentDateStr); todayObj.setHours(0,0,0,0);
+
+            const todoHTML = todos.sort((a,b) => new Date(a.date) - new Date(b.date)).map(todo => {
+                const todoDateObj = new Date(todo.date); todoDateObj.setHours(0,0,0,0);
+                let dateColor = 'text-blue-600 bg-blue-50 border-blue-200', dateLabel = todo.date, textClass = 'text-gray-800', iconHtml = `<i data-lucide="circle" class="text-gray-300 w-5 h-5"></i>`;
+                
+                if (todo.completed) { dateColor = 'text-gray-500 bg-gray-100 border-gray-200'; dateLabel = `Selesai: ${todo.date}`; textClass = 'text-gray-400 line-through italic'; iconHtml = `<i data-lucide="check-circle-2" class="text-green-500 w-5 h-5"></i>`; }
+                else if (todoDateObj < todayObj) { dateColor = 'text-red-600 bg-red-50 border-red-200'; dateLabel = `Tertunggak: ${todo.date}`; }
+                else if (todoDateObj.getTime() === todayObj.getTime()) { dateColor = 'text-orange-600 bg-orange-50 border-orange-200'; dateLabel = `Hari Ini`; }
+                else { dateColor = 'text-green-600 bg-green-50 border-green-200'; }
+
+                return `<div class="flex items-start p-3 border-b border-gray-50 hover:bg-gray-50 transition cursor-pointer" onclick="toggleTodo(${todo.id})">
+                            <div class="mr-3 mt-1.5">${iconHtml}</div>
+                            <div class="flex-1 overflow-hidden">
+                                <p class="text-sm font-medium ${textClass} truncate pr-2">${todo.text}</p>
+                                <div class="flex items-center mt-1.5 space-x-2">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded border flex-shrink-0 ${dateColor}"><i data-lucide="calendar" class="w-3 h-3 inline mr-0.5"></i> ${dateLabel}</span>
+                                    <span class="text-[10px] text-gray-500 truncate flex-1"><i data-lucide="user" class="w-3 h-3 inline mr-0.5"></i> ${todo.addedBy || 'Sistem'}</span>
+                                </div>
+                            </div>
+                            <button onclick="viewTodoDetails(${todo.id}); event.stopPropagation();" class="ml-1 mt-1 p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors flex-shrink-0" title="Lihat Info"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                        </div>`;
+            }).join('') || '<p class="p-5 text-xs text-center text-gray-400">Tiada tugasan di dalam rekod.</p>';
+            document.getElementById('todoListContainer').innerHTML = todoHTML;
+
+            document.getElementById('checklistContainer').innerHTML = checklists.slice(0,2).map(c => `
+                <div class="bg-gray-50/50 p-4 rounded-xl border border-gray-100 hover:border-blue-100 transition-colors">
+                    <div class="flex justify-between items-center mb-2"><span class="text-sm font-semibold text-gray-800">${c.title}</span><span class="text-[11px] font-bold px-2 py-0.5 bg-white text-gray-600 border border-gray-200 rounded-md shadow-sm">${c.completedItems}/${c.items}</span></div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden"><div class="bg-gradient-to-r ${c.progress === 100 ? 'from-green-500 to-green-400' : 'from-blue-600 to-indigo-500'} h-2 rounded-full transition-all duration-1000" style="width: ${c.progress}%"></div></div>
+                </div>`).join('') || '<p class="text-xs text-gray-400 text-center">Tiada status semakan.</p>';
             lucide.createIcons();
         }
 
-        function showTypingIndicator() {
-            const id = 'typing-' + Date.now();
-            const html = `<div id="${id}" class="flex justify-start animate-fade-in"><div class="bg-white border border-gray-100 rounded-2xl rounded-tl-none p-3 shadow-sm flex space-x-1"><div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div><div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 150ms"></div><div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 300ms"></div></div></div>`;
-            chatMessages.insertAdjacentHTML('beforeend', html);
-            scrollToBottom();
-            return id;
+        function renderCalendar() {
+            const [year, month] = selectedDate.split('-').map(Number);
+            const firstDay = new Date(year, month - 1, 1).getDay();
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const monthNames = ["Jan", "Feb", "Mac", "Apr", "Mei", "Jun", "Jul", "Ogo", "Sep", "Okt", "Nov", "Dis"];
+            document.getElementById('calendarMonthDisplay').innerText = `${monthNames[month-1]} ${year}`;
+            
+            let html = '';
+            for(let i = 0; i < firstDay; i++) html += `<div></div>`;
+            for(let i = 1; i <= daysInMonth; i++) {
+                const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const hasEvent = todos.some(t => String(t.date).split('T')[0] === dateStr);
+                const isSel = dateStr === selectedDate; const isTod = dateStr === currentDateStr;
+                
+                let cls = "aspect-square rounded-xl text-gray-700 flex flex-col items-center justify-center relative cursor-pointer font-medium transition-all hover:bg-gray-100 ";
+                if (isSel) cls += "bg-blue-600 text-white shadow-lg transform scale-105 hover:bg-blue-700";
+                else if (isTod) cls += "bg-blue-50 text-blue-700 border border-blue-200";
+
+                html += `<div class="${cls}" onclick="selectDate('${dateStr}')"><span>${i}</span>
+                        ${hasEvent && !isSel ? `<span class="w-1.5 h-1.5 rounded-full bg-red-500 absolute bottom-1.5 shadow-sm"></span>` : ''}
+                        ${hasEvent && isSel ? `<span class="w-1.5 h-1.5 rounded-full bg-white absolute bottom-1.5 shadow-sm"></span>` : ''}</div>`;
+            }
+            document.getElementById('calendarGrid').innerHTML = html; renderCalendarTodos();
+        }
+
+        function prevMonth() { const d = new Date(selectedDate); d.setMonth(d.getMonth() - 1); selectedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`; renderCalendar(); }
+        function nextMonth() { const d = new Date(selectedDate); d.setMonth(d.getMonth() + 1); selectedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`; renderCalendar(); }
+        function selectDate(dateStr) { selectedDate = dateStr; renderCalendar(); }
+
+        function renderCalendarTodos() {
+            const dateTodos = todos.filter(t => String(t.date).split('T')[0] === selectedDate);
+            document.getElementById('selectedDateHeader').innerText = new Date(selectedDate).toLocaleDateString('ms-MY', optionsDate);
+            
+            if(dateTodos.length === 0) {
+                document.getElementById('fullTodoList').innerHTML = `<div class="text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-200"><i data-lucide="calendar-x" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i><p class="text-sm text-gray-500 font-medium">Tiada tugasan.</p></div>`;
+            } else {
+                document.getElementById('fullTodoList').innerHTML = dateTodos.map(todo => `
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-start cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all group" onclick="toggleTodo(${todo.id})">
+                        <div class="mr-3 mt-0.5">${todo.completed ? `<i data-lucide="check-circle-2" class="text-green-500 w-5 h-5"></i>` : `<i data-lucide="circle" class="text-gray-300 w-5 h-5"></i>`}</div>
+                        <div class="flex-1 overflow-hidden">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1 overflow-hidden"><p class="text-sm font-bold truncate pr-2 ${todo.completed ? 'text-gray-400 line-through italic' : 'text-gray-800'}">${todo.text}</p><p class="text-[10px] text-gray-500 mt-1 flex items-center"><i data-lucide="user" class="w-3 h-3 mr-1"></i> ${todo.addedBy || 'Sistem'}</p></div>
+                                <button onclick="viewTodoDetails(${todo.id}); event.stopPropagation();" class="text-gray-400 hover:text-blue-600 p-1.5 bg-white shadow-sm rounded-lg flex-shrink-0 transition-colors opacity-0 group-hover:opacity-100 md:opacity-100" title="Lihat Info"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>
+                    </div>`).join('');
+            } lucide.createIcons();
+        }
+
+        function renderPrograms() {
+            document.getElementById('programsContainer').innerHTML = programs.map(p => `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative group cursor-pointer hover:shadow-md hover:border-blue-200 transition-all transform hover:-translate-y-1" onclick="toggleProgram(${p.id})">
+                    <div class="w-1.5 h-full ${p.completed ? 'bg-gray-300' : 'bg-blue-500'} absolute left-0 top-0"></div>
+                    <div class="p-5 pl-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-[10px] font-bold ${p.completed ? 'text-gray-500 bg-gray-100' : 'text-blue-700 bg-blue-50'} px-2.5 py-1 rounded-md uppercase flex items-center">${p.completed ? '<i data-lucide="check-circle-2" class="w-3 h-3 mr-1"></i> Selesai' : p.status}</span>
+                            <button class="text-gray-300 hover:text-gray-600 p-1" onclick="event.stopPropagation()"><i data-lucide="more-vertical" class="w-4 h-4"></i></button>
+                        </div>
+                        <h3 class="font-bold ${p.completed ? 'text-gray-400 line-through italic' : 'text-gray-800'} mb-4 text-sm">${p.title}</h3>
+                        <div class="space-y-2 text-xs text-gray-500 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <div class="flex items-center"><i data-lucide="calendar" class="w-3.5 h-3.5 mr-2 text-blue-400"></i> <span class="font-medium text-gray-700">${p.date}</span></div>
+                            <div class="flex items-center"><i data-lucide="map-pin" class="w-3.5 h-3.5 mr-2 text-red-400"></i> <span class="truncate">${p.location}</span></div>
+                        </div>
+                    </div>
+                </div>`).join(''); lucide.createIcons();
+        }
+
+        function toggleProgram(id) { const i = programs.findIndex(p => p.id === id); if(i > -1) { programs[i].completed = !programs[i].completed; if(gasEndpointUrl) apiCall('update', 'Programs', programs[i]); if(!document.getElementById('tab-programs').classList.contains('hidden')) renderPrograms(); renderDashboardData(); } }
+
+        function renderLinks() {
+            document.getElementById('linksContainer').innerHTML = linksRepo.map(link => `
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col hover:shadow-md hover:border-blue-200 transition-all transform hover:-translate-y-1">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mr-3 flex-shrink-0"><i data-lucide="link" class="w-5 h-5"></i></div>
+                        <h3 class="font-bold text-gray-800 text-sm flex-1 pt-1">${link.title}</h3>
+                        <a href="${link.url}" target="_blank" class="p-2 bg-gray-50 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors ml-2"><i data-lucide="external-link" class="w-4 h-4"></i></a>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-3 rounded-xl border border-gray-100 flex-1">${link.desc}</p>
+                    <div class="flex justify-between items-center"><span class="text-[10px] text-gray-400 font-medium"><i data-lucide="user" class="w-3 h-3 inline mr-0.5"></i> ${link.addedBy}</span><span class="text-[9px] font-bold tracking-widest bg-gray-100 text-gray-500 px-2 py-1 rounded uppercase">Rujukan</span></div>
+                </div>`).join(''); lucide.createIcons();
+        }
+
+        function renderSettings() {
+            document.getElementById('profName').value = currentUser.name; document.getElementById('profStation').value = currentUser.station; document.getElementById('profEmail').value = currentUser.email; document.getElementById('profPhone').value = currentUser.phone; document.getElementById('profPass').value = currentUser.password;
+            if (currentUser.role === 'Admin') { document.getElementById('setAppName').value = appSettings.appName; document.getElementById('setAppLogo').value = appSettings.logoUrl; document.getElementById('setGasUrl').value = gasEndpointUrl; renderAdminUsers(); }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', (e) => {
+            e.preventDefault(); const idx = usersData.findIndex(u => String(u.email) === String(currentUser.email));
+            if(idx > -1) {
+                usersData[idx].name = document.getElementById('profName').value; usersData[idx].station = document.getElementById('profStation').value; usersData[idx].phone = document.getElementById('profPhone').value; usersData[idx].password = document.getElementById('profPass').value;
+                currentUser = { ...usersData[idx] }; if(gasEndpointUrl) apiCall('update', 'Users', usersData[idx]);
+                showToast("Profil dikemaskini!", "success"); document.getElementById('userNameDesktop').innerText = currentUser.name;
+            }
+        });
+
+        document.getElementById('appSettingsForm').addEventListener('submit', (e) => { e.preventDefault(); appSettings.appName = document.getElementById('setAppName').value; appSettings.logoUrl = document.getElementById('setAppLogo').value; applyAppSettings(); gasEndpointUrl = document.getElementById('setGasUrl').value.trim(); localStorage.setItem('pkg_gas_url', gasEndpointUrl); showToast("Tetapan disimpan!", "success"); });
+
+        function renderAdminUsers() {
+            document.getElementById('adminUserList').innerHTML = usersData.map(user => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm mr-3">${user.name.charAt(0)}</div>
+                        <div><p class="text-sm font-bold text-gray-800 leading-tight">${user.name}</p><p class="text-[11px] text-gray-500 mt-0.5">${user.email}</p><span class="text-[9px] font-bold inline-block mt-1.5 px-2 py-0.5 rounded uppercase tracking-wider ${user.role === 'Admin' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">${user.role}</span></div>
+                    </div>
+                    ${user.email !== currentUser.email ? `<button onclick="toggleUserRole('${user.id}')" class="text-xs font-bold bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors shadow-sm active:scale-95"><i data-lucide="refresh-ccw" class="w-3.5 h-3.5 md:mr-1 inline"></i><span class="hidden md:inline">Tukar Peranan</span></button>` : ''}
+                </div>`).join(''); lucide.createIcons();
+        }
+
+        // --- SIMULASI CHATBOT ---
+        const chatInput = document.getElementById('chatInput'); const chatForm = document.getElementById('chatForm'); const chatSubmitBtn = document.getElementById('chatSubmitBtn'); const chatMessages = document.getElementById('chatMessages');
+        chatInput.addEventListener('input', () => { chatSubmitBtn.disabled = chatInput.value.trim() === ''; });
+        function scrollToBottom() { chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' }); }
+        
+        function addMessage(text, sender) {
+            const h = sender === 'system' ? `<div class="flex justify-center animate-fade-in my-3"><div class="bg-gray-200/60 text-gray-600 text-[11px] font-bold px-4 py-1.5 rounded-full text-center flex items-center shadow-sm"><i data-lucide="info" class="w-3 h-3 mr-1.5"></i> ${text}</div></div>` : `<div class="flex ${sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in"><div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm ${sender === 'user' ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none'}"><p class="text-sm leading-relaxed">${text}</p></div></div>`;
+            chatMessages.insertAdjacentHTML('beforeend', h); scrollToBottom(); lucide.createIcons();
         }
 
         chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const text = chatInput.value.trim();
-            if(!text) return;
-
-            addMessage(text, 'user');
-            chatInput.value = '';
-            chatSubmitBtn.disabled = true;
-
-            const typingId = showTypingIndicator();
+            e.preventDefault(); const text = chatInput.value.trim(); if(!text) return;
+            addMessage(text, 'user'); chatInput.value = ''; chatSubmitBtn.disabled = true;
+            const id = 'typing-' + Date.now(); chatMessages.insertAdjacentHTML('beforeend', `<div id="${id}" class="flex justify-start animate-fade-in"><div class="bg-white border border-gray-100 rounded-2xl rounded-tl-none p-4 shadow-sm flex space-x-1.5"><div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div><div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div><div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 300ms"></div></div></div>`); scrollToBottom();
 
             setTimeout(() => {
-                document.getElementById(typingId).remove();
-                const lowerText = text.toLowerCase();
-                let response = "Maaf, saya tak faham arahan itu. Boleh tanya tentang <b>status</b>, <b>program</b>, atau <b>hari ini</b>.";
-
-                const userTodos = todos; 
-
-                if (lowerText.includes('hari ini') || lowerText.includes('today')) {
-                    const todayTodos = userTodos.filter(t => t.date === currentDateStr);
-                    if(todayTodos.length > 0) {
-                        response = `Berdasarkan kalendar anda, anda mempunyai <b>${todayTodos.length} rekod</b> untuk hari ini (${currentDateStr}). Tugasan utama: "${todayTodos[0].text}".`;
-                    } else {
-                        response = `Saya telah menyemak jadual anda. Tiada rekod dimasukkan untuk hari ini. Anda boleh klik butang <b>(+)</b> di tab Kalendar.`;
-                    }
-                }
-                else if (lowerText.includes('status') || lowerText.includes('tugasan') || lowerText.includes('todo')) {
-                    const pending = userTodos.filter(t => !t.completed).length;
-                    const nextTodo = userTodos.find(t => !t.completed);
-                    response = `Anda mempunyai <b>${pending} tugasan aktif</b> secara keseluruhan. Tugasan terdekat dalam kalendar anda ialah "${nextTodo ? nextTodo.text : 'Tiada'}".`;
-                } 
-                else if (lowerText.includes('program') || lowerText.includes('bengkel')) {
-                    response = `Program terdekat: <b>${programs[0].title}</b> pada ${programs[0].date}. Status: ${programs[0].status}.`;
-                }
-                else if (lowerText.includes('pautan') || lowerText.includes('link') || lowerText.includes('url')) {
-                    response = `Anda boleh mengakses sistem rasmi melalui tab <b>Pautan</b>. Setakat ini terdapat ${linksRepo.length} pautan dalam repositori.`;
-                }
-                else if (lowerText.includes('admin') || lowerText.includes('siapa saya') || lowerText.includes('profil')) {
-                    response = currentUser.role === 'Admin' 
-                        ? `Anda log masuk sebagai <b>Pentadbir (Admin)</b>. Anda mempunyai akses untuk menguruskan data sistem.`
-                        : `Anda log masuk sebagai Pengguna Biasa. Rekod kalendar dan fail adalah sulit untuk kegunaan anda.`;
-                }
-                else if (lowerText.includes('salam') || lowerText.includes('hai')) {
-                    response = `Salam sejahtera, ${currentUser.name}! Saya AI PKG sedia membantu. Ingin saya semak jadual anda untuk hari ini?`;
-                }
-
-                addMessage(response, 'ai');
-            }, 1000); 
+                document.getElementById(id).remove(); const lt = text.toLowerCase(); let res = "Maaf, boleh tanya tentang <b>status</b>, <b>program</b>, atau <b>hari ini</b>.";
+                if (lt.includes('hari ini')) { const td = todos.filter(t => String(t.date).split('T')[0] === currentDateStr); res = td.length > 0 ? `Hari ini anda ada <b>${td.length} rekod</b>. Utama: "${td[0].text}".` : `Tiada rekod untuk hari ini. Boleh rehat!`; }
+                else if (lt.includes('status') || lt.includes('todo')) { const p = todos.filter(t => !t.completed).length; res = `Terdapat <b>${p} tugasan aktif</b> dalam jadual.`; }
+                else if (lt.includes('program')) { res = programs.length ? `Program terdekat: <b>${programs[0].title}</b> (${programs[0].status}).` : "Tiada program berdaftar."; }
+                else if (lt.includes('salam') || lt.includes('hai')) { res = `Salam sejahtera, bos! Saya AI sedia menabur bakti.`; }
+                addMessage(res, 'ai');
+            }, 800); 
         });
-
     </script>
 </body>
 </html>
