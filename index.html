@@ -114,10 +114,10 @@
     <!-- STRUKTUR UTAMA APLIKASI (DENGAN SIDEBAR) -->
     <div id="appView" class="hidden w-full h-full flex flex-col md:flex-row bg-gray-50 overflow-hidden relative max-w-7xl mx-auto md:shadow-2xl">
         
-        <!-- BUTANG ANTI-STRESS -->
-        <button onclick="triggerAntiStress()" title="Butang Anti Stress!" class="fixed bottom-24 md:bottom-10 right-6 z-50 w-14 h-14 bg-pink-500 rounded-full shadow-lg flex items-center justify-center text-white hover:bg-pink-600 transition-transform transform active:scale-90 hover:scale-110 border-4 border-white animate-bounce" style="animation-duration: 3s;">
-            <i data-lucide="heart" class="w-6 h-6 fill-white"></i>
-        </button>
+        <!-- BUTANG ANTI-STRESS (BEAR) -->
+        <div id="antiStressBtn" title="Tarik saya ke mana-mana, atau tekan untuk motivasi!" class="fixed bottom-24 md:bottom-10 right-6 z-50 w-24 h-24 cursor-grab transition-transform transform hover:scale-110 animate-bounce drop-shadow-2xl" style="animation-duration: 3s; touch-action: none;">
+            <img src="https://png.pngtree.com/png-clipart/20250118/original/pngtree-a-cute-bear-reaching-out-with-open-arms-for-big-hug-png-image_19223227.png" alt="Bear Hug" class="w-full h-full object-contain pointer-events-none">
+        </div>
 
         <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden animate-fade-in" onclick="toggleMobileMenu()"></div>
         
@@ -205,7 +205,7 @@
                 <div id="tab-calendar" class="space-y-5 animate-slide-up hidden h-full flex-col max-w-6xl mx-auto">
                     <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800">Kalendar & Tugasan</h2>
-                        <button onclick="openAddModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-md text-sm font-bold active:scale-95 transition-transform"><i data-lucide="plus" class="w-4 h-4 md:mr-1"></i> <span class="hidden md:inline">Tambah</span></button>
+                        <button onclick="openTodoModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-md text-sm font-bold active:scale-95 transition-transform"><i data-lucide="plus" class="w-4 h-4 md:mr-1"></i> <span class="hidden md:inline">Tambah</span></button>
                     </div>
                     <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
                         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 lg:w-1/3 flex-shrink-0 h-fit">
@@ -230,7 +230,10 @@
 
                 <!-- Tab Program -->
                 <div id="tab-programs" class="space-y-5 animate-slide-up hidden max-w-6xl mx-auto">
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100"><h2 class="text-lg font-bold text-gray-800">Direktori Program</h2></div>
+                    <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-lg font-bold text-gray-800">Direktori Program</h2>
+                        <button onclick="openProgramModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-md text-sm font-bold active:scale-95 transition-transform"><i data-lucide="plus" class="w-4 h-4 md:mr-1"></i> <span class="hidden md:inline">Tambah</span></button>
+                    </div>
                     <div id="programsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
 
@@ -238,7 +241,7 @@
                 <div id="tab-links" class="space-y-5 animate-slide-up hidden max-w-6xl mx-auto">
                     <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800">Repositori Pautan</h2>
-                        <button onclick="openAddLinkModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-md text-sm font-bold active:scale-95 transition-transform"><i data-lucide="plus" class="w-4 h-4 md:mr-1"></i> <span class="hidden md:inline">Tambah</span></button>
+                        <button onclick="openLinkModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-md text-sm font-bold active:scale-95 transition-transform"><i data-lucide="plus" class="w-4 h-4 md:mr-1"></i> <span class="hidden md:inline">Tambah</span></button>
                     </div>
                     <div id="linksContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
@@ -319,7 +322,7 @@
                                     <h3 class="font-bold text-gray-800 flex items-center text-sm"><i data-lucide="users" class="w-4 h-4 mr-2 text-red-600"></i> Pengguna</h3>
                                     <div class="flex space-x-1">
                                         <button onclick="syncUsersOnly()" type="button" class="p-1.5 bg-gray-50 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600" title="Refresh"><i data-lucide="refresh-cw" class="w-4 h-4" id="syncUserIcon"></i></button>
-                                        <button onclick="openAddUserModal()" type="button" class="p-1.5 bg-gray-50 text-gray-600 rounded-lg hover:bg-red-50 hover:text-red-600" title="Tambah Pengguna"><i data-lucide="user-plus" class="w-4 h-4"></i></button>
+                                        <button onclick="openUserModal()" type="button" class="p-1.5 bg-gray-50 text-gray-600 rounded-lg hover:bg-red-50 hover:text-red-600" title="Tambah Pengguna"><i data-lucide="user-plus" class="w-4 h-4"></i></button>
                                     </div>
                                 </div>
                                 <div id="adminUserList" class="space-y-2 overflow-y-auto custom-scrollbar flex-1 pr-1"></div>
@@ -333,10 +336,10 @@
 
     <!-- MODAL FORMS -->
     <!-- Modal Tugasan -->
-    <div id="addModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-center items-center animate-fade-in backdrop-blur-sm px-4">
+    <div id="todoModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-center items-center animate-fade-in backdrop-blur-sm px-4">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md animate-slide-up shadow-2xl relative">
-            <div class="flex justify-between items-center mb-5"><h3 class="font-bold text-lg">Tambah Tugasan</h3><button onclick="closeAddModal()" class="p-1.5 bg-gray-50 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <form id="addDataForm" class="space-y-4">
+            <div class="flex justify-between items-center mb-5"><h3 id="modalTitleTodo" class="font-bold text-lg">Tambah Tugasan</h3><button onclick="closeTodoModal()" class="p-1.5 bg-gray-50 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <form id="todoForm" class="space-y-4">
                 <input type="text" id="addTitle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="Tajuk tugasan">
                 <input type="date" id="addDate" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none">
                 <input type="url" id="addLink" class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="Pautan Rujukan (https://...)">
@@ -348,10 +351,10 @@
     </div>
     
     <!-- Modal Pautan -->
-    <div id="addLinkModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-center items-center animate-fade-in backdrop-blur-sm px-4">
+    <div id="linkModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-center items-center animate-fade-in backdrop-blur-sm px-4">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md animate-slide-up shadow-2xl relative">
-            <div class="flex justify-between items-center mb-5"><h3 class="font-bold text-lg">Tambah Pautan</h3><button onclick="closeAddLinkModal()" class="p-1.5 bg-gray-50 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <form id="addLinkForm" class="space-y-4">
+            <div class="flex justify-between items-center mb-5"><h3 id="modalTitleLink" class="font-bold text-lg">Tambah Pautan</h3><button onclick="closeLinkModal()" class="p-1.5 bg-gray-50 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <form id="linkForm" class="space-y-4">
                 <input type="text" id="addLinkTitle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="Tajuk Pautan">
                 <input type="url" id="addLinkUrl" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="https://...">
                 <textarea id="addLinkDesc" rows="2" class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="Penerangan ringkas..."></textarea>
@@ -360,11 +363,29 @@
         </div>
     </div>
 
-    <!-- Modal Pengguna -->
-    <div id="addUserModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-center items-center animate-fade-in backdrop-blur-sm px-4">
+    <!-- Modal Program -->
+    <div id="programModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-center items-center animate-fade-in backdrop-blur-sm px-4">
         <div class="bg-white rounded-2xl p-6 w-full max-w-md animate-slide-up shadow-2xl relative">
-            <div class="flex justify-between items-center mb-5"><h3 class="font-bold text-lg">Daftar Pengguna</h3><button onclick="closeAddUserModal()" class="p-1.5 bg-gray-50 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <form id="addUserForm" class="space-y-3">
+            <div class="flex justify-between items-center mb-5"><h3 id="modalTitleProgram" class="font-bold text-lg">Tambah Program</h3><button onclick="closeProgramModal()" class="p-1.5 bg-gray-50 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <form id="programForm" class="space-y-4">
+                <input type="text" id="progTitle" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="Nama Program">
+                <input type="date" id="progDate" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none">
+                <input type="text" id="progLocation" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="Lokasi">
+                <select id="progStatus" class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none text-gray-700">
+                    <option value="Akan Datang">Akan Datang</option>
+                    <option value="Sedang Berlangsung">Sedang Berlangsung</option>
+                    <option value="Selesai">Selesai</option>
+                </select>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-md">Simpan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Pengguna -->
+    <div id="userModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col justify-center items-center animate-fade-in backdrop-blur-sm px-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md animate-slide-up shadow-2xl relative">
+            <div class="flex justify-between items-center mb-5"><h3 class="font-bold text-lg">Daftar Pengguna</h3><button onclick="closeUserModal()" class="p-1.5 bg-gray-50 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <form id="userForm" class="space-y-3">
                 <input type="text" id="newUserName" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="Nama Penuh">
                 <input type="email" id="newUserEmail" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="E-mel">
                 <input type="text" id="newUserPassword" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none" placeholder="Kata Laluan">
@@ -387,6 +408,11 @@
         let currentDateStr = new Date().toISOString().split('T')[0]; 
         let selectedDate = currentDateStr; 
         
+        // State Editing Variables
+        let editTodoId = null;
+        let editLinkId = null;
+        let editProgramId = null;
+
         let gasEndpointUrl = localStorage.getItem('pkg_gas_url') || 'https://script.google.com/macros/s/AKfycbwBkETtFzcceUu83o_2FeNlLJGfTmx3gmLFJJpSjoVpPMk03tahHX0hfUAGHaxZQVi7/exec'; 
         let usersData = [{ id: 'admin1', name: 'Mohd Shahrol', station: 'PKG Sarawak', email: 'mohd.shahrol@moe.gov.my', phone: '012-3456789', password: 'password', role: 'Admin' }];
         let linksRepo = [], todos = [], programs = [], checklists = [];
@@ -434,15 +460,11 @@
             });
         }
 
-        // Pastikan tatasusunan komen & likes wujud (jika dari sheet lama)
         function sanitizeItems(items) {
             return items.map(item => {
                 if (!item.likes) item.likes = 0;
                 if (!item.comments) item.comments = [];
-                // Cuba parse dari string (Jika disimpan dlm google sheet sbgi string JSON)
-                if (typeof item.comments === 'string') {
-                    try { item.comments = JSON.parse(item.comments); } catch(e) { item.comments = []; }
-                }
+                if (typeof item.comments === 'string') { try { item.comments = JSON.parse(item.comments); } catch(e) { item.comments = []; } }
                 return item;
             });
         }
@@ -527,27 +549,107 @@
         ];
 
         function triggerAntiStress() {
-            // Hasilkan salji emoji rawak (Love & Senyum)
             for(let i=0; i<15; i++) {
                 setTimeout(() => {
                     const emj = document.createElement('div');
                     emj.className = 'snow-emoji';
                     emj.innerText = Math.random() > 0.5 ? '❤️' : '😊';
                     emj.style.left = Math.random() * 100 + 'vw';
-                    emj.style.animationDuration = (Math.random() * 2 + 2) + 's'; // Antara 2-4 saat
+                    emj.style.animationDuration = (Math.random() * 2 + 2) + 's';
                     emj.style.fontSize = (Math.random() * 15 + 15) + 'px';
                     document.body.appendChild(emj);
-                    // Buang lepas animasi habis
                     setTimeout(() => emj.remove(), 4000);
-                }, i * 100); // Keluarkan satu-satu dengan sela masa
+                }, i * 100); 
             }
 
-            // Keluarkan Mesej Rawak Terapung (Pop-up Teks)
             const msgDiv = document.createElement('div');
             msgDiv.className = 'stress-msg';
             msgDiv.innerText = stressMotivations[Math.floor(Math.random() * stressMotivations.length)];
             document.body.appendChild(msgDiv);
             setTimeout(() => msgDiv.remove(), 4000);
+        }
+
+        // --- LOGIK DRAG AND DROP BERUANG ANTI-STRESS ---
+        const bearBtn = document.getElementById('antiStressBtn');
+        let isDragging = false, moved = false;
+        let startX, startY, initialX, initialY;
+
+        bearBtn.addEventListener('mousedown', dragStart);
+        bearBtn.addEventListener('touchstart', dragStart, {passive: false});
+
+        function dragStart(e) {
+            if (e.type === 'touchstart') {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            } else {
+                startX = e.clientX;
+                startY = e.clientY;
+                e.preventDefault(); // Elak browser drag gambar asal
+            }
+            
+            const rect = bearBtn.getBoundingClientRect();
+            initialX = rect.left;
+            initialY = rect.top;
+            
+            isDragging = true;
+            moved = false;
+            
+            // Tukar posisi dari right/bottom kepada absolute left/top
+            bearBtn.style.right = 'auto';
+            bearBtn.style.bottom = 'auto';
+            bearBtn.style.left = initialX + 'px';
+            bearBtn.style.top = initialY + 'px';
+            bearBtn.style.cursor = 'grabbing';
+            bearBtn.classList.remove('animate-bounce'); // Hentikan lompatan masa ditarik
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag, {passive: false});
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('touchend', dragEnd);
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            let currentX, currentY;
+            
+            if (e.type === 'touchmove') {
+                currentX = e.touches[0].clientX;
+                currentY = e.touches[0].clientY;
+                e.preventDefault(); // Elak skrin scroll semasa tarik beruang
+            } else {
+                currentX = e.clientX;
+                currentY = e.clientY;
+            }
+            
+            const dx = currentX - startX;
+            const dy = currentY - startY;
+            
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) moved = true;
+            
+            let newX = initialX + dx;
+            let newY = initialY + dy;
+            
+            // Pastikan beruang tidak ditarik terkeluar dari skrin
+            newX = Math.max(0, Math.min(newX, window.innerWidth - bearBtn.offsetWidth));
+            newY = Math.max(0, Math.min(newY, window.innerHeight - bearBtn.offsetHeight));
+            
+            bearBtn.style.left = newX + 'px';
+            bearBtn.style.top = newY + 'px';
+        }
+
+        function dragEnd(e) {
+            if(!isDragging) return;
+            isDragging = false;
+            bearBtn.style.cursor = 'grab';
+            bearBtn.classList.add('animate-bounce'); // Sambung lompat
+            
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('mouseup', dragEnd);
+            document.removeEventListener('touchend', dragEnd);
+            
+            // Jika beruang tidak dialih jauh (hanya disentuh), keluarkan salji & motivasi
+            if (!moved) triggerAntiStress(); 
         }
 
         // --- LIKES & COMMENTS LOGIC ---
@@ -557,15 +659,11 @@
             if(item) {
                 if(!item.likes) item.likes = 0;
                 item.likes += 1;
-                
-                // Simpan format string jika nak pass ke API yg tak pandai baca object
                 const updatePayload = { ...item };
                 updatePayload.comments = JSON.stringify(item.comments || []);
                 if(gasEndpointUrl) apiCall('update', type === 'todo' ? 'Todos' : 'Programs', updatePayload);
-                
-                // Refresh modal window immediately
-                if(type === 'todo') viewTodoDetails(id);
-                else viewProgramDetails(id);
+                if(type === 'todo') viewTodoDetails(id); else viewProgramDetails(id);
+                renderDashboardData(); if(type === 'program') renderPrograms();
             }
         }
 
@@ -588,12 +686,12 @@
                 updatePayload.comments = JSON.stringify(item.comments);
                 if(gasEndpointUrl) apiCall('update', type === 'todo' ? 'Todos' : 'Programs', updatePayload);
                 
-                if(type === 'todo') viewTodoDetails(id);
-                else viewProgramDetails(id);
+                if(type === 'todo') viewTodoDetails(id); else viewProgramDetails(id);
+                renderDashboardData(); if(type === 'program') renderPrograms();
             }
         }
 
-        // --- LOGIN / LOGOUT (DENGAN SAPAAN) ---
+        // --- LOGIN / LOGOUT ---
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const em = document.getElementById('emailInput').value.trim().toLowerCase();
@@ -601,9 +699,7 @@
             const btn = e.target.querySelector('button[type="submit"]');
             
             const originalBtnText = btn.innerHTML;
-            btn.innerHTML = 'Menyemak Pangkalan Data...';
-            btn.disabled = true;
-            btn.classList.add('opacity-70');
+            btn.innerHTML = 'Menyemak Pangkalan Data...'; btn.disabled = true; btn.classList.add('opacity-70');
             document.getElementById('loginError').classList.add('hidden');
 
             if(gasEndpointUrl) {
@@ -639,9 +735,7 @@
                 if(isAdmin) renderAdminUsers();
                 showToast("Berjaya Log Masuk & Data Disegerakkan!", "success");
 
-            } else { 
-                document.getElementById('loginError').classList.remove('hidden'); 
-            }
+            } else { document.getElementById('loginError').classList.remove('hidden'); }
             
             btn.innerHTML = originalBtnText; btn.disabled = false; btn.classList.remove('opacity-70');
         });
@@ -653,21 +747,67 @@
             switchTab('dashboard'); 
         }
 
-        // --- CRUD TUGASAN & KALENDAR ---
-        function openAddModal() { document.getElementById('addDate').value = selectedDate; document.getElementById('addModal').classList.remove('hidden'); document.getElementById('addModal').classList.add('flex'); }
-        function closeAddModal() { document.getElementById('addModal').classList.add('hidden'); document.getElementById('addModal').classList.remove('flex'); document.getElementById('addDataForm').reset(); }
+        // --- EDIT LOGIC CONTROL ---
+        function checkEditPermission(addedByStr) {
+            if(!currentUser) return false;
+            return currentUser.role === 'Admin' || addedByStr === currentUser.name;
+        }
 
-        document.getElementById('addDataForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const newTodo = { id: Date.now(), text: document.getElementById('addTitle').value, completed: false, priority: 'medium', date: document.getElementById('addDate').value, link: document.getElementById('addLink').value, pdf: document.getElementById('addPdf').files[0] ? document.getElementById('addPdf').files[0].name : '', notes: document.getElementById('addNotes').value, addedBy: currentUser.name, likes: 0, comments: [] };
-            todos.push(newTodo); 
-            
-            if(gasEndpointUrl) {
-                const payload = {...newTodo}; payload.comments = JSON.stringify(payload.comments);
-                apiCall('create', 'Todos', payload);
+        // --- CRUD TUGASAN & KALENDAR ---
+        function openTodoModal(id = null) { 
+            editTodoId = id; 
+            document.getElementById('modalTitleTodo').innerText = id ? "Kemaskini Tugasan" : "Tambah Tugasan";
+            document.getElementById('todoForm').reset();
+            if(id) {
+                const t = todos.find(x => x.id === id);
+                if(t) {
+                    document.getElementById('addTitle').value = t.text;
+                    document.getElementById('addDate').value = String(t.date).split('T')[0];
+                    document.getElementById('addLink').value = t.link || '';
+                    document.getElementById('addNotes').value = t.notes || '';
+                }
+            } else {
+                document.getElementById('addDate').value = selectedDate; 
             }
-            closeAddModal(); selectedDate = newTodo.date; renderDashboardData(); if(!document.getElementById('tab-calendar').classList.contains('hidden')) renderCalendar();
-            showToast("Tugasan ditambah.", "success"); sendDeviceNotification("Kalendar Baru", `Tugasan: "${newTodo.text}" pada ${newTodo.date}.`);
+            if(id) closeMiniWindow(); // Tutup window detail jika dipanggil dari situ
+            document.getElementById('todoModal').classList.remove('hidden'); document.getElementById('todoModal').classList.add('flex'); 
+        }
+        function closeTodoModal() { editTodoId = null; document.getElementById('todoModal').classList.add('hidden'); document.getElementById('todoModal').classList.remove('flex'); document.getElementById('todoForm').reset(); }
+
+        document.getElementById('todoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                text: document.getElementById('addTitle').value,
+                date: document.getElementById('addDate').value,
+                link: document.getElementById('addLink').value,
+                notes: document.getElementById('addNotes').value,
+                addedBy: currentUser.name
+            };
+            const file = document.getElementById('addPdf').files[0];
+            if(file) payload.pdf = file.name;
+
+            if (editTodoId) {
+                const idx = todos.findIndex(t => t.id === editTodoId);
+                if(idx > -1) {
+                    // Update field yg diubah sahaja
+                    todos[idx] = { ...todos[idx], ...payload, addedBy: todos[idx].addedBy }; // keep original owner
+                    if(gasEndpointUrl) {
+                        const dbPayload = {...todos[idx]}; dbPayload.comments = JSON.stringify(dbPayload.comments || []);
+                        apiCall('update', 'Todos', dbPayload);
+                    }
+                    showToast("Tugasan dikemaskini.", "success");
+                }
+            } else {
+                payload.id = Date.now(); payload.completed = false; payload.likes = 0; payload.comments = []; payload.pdf = payload.pdf || '';
+                todos.push(payload); 
+                if(gasEndpointUrl) {
+                    const dbPayload = {...payload}; dbPayload.comments = JSON.stringify(dbPayload.comments);
+                    apiCall('create', 'Todos', dbPayload);
+                }
+                showToast("Tugasan ditambah.", "success"); sendDeviceNotification("Kalendar Baru", `Tugasan: "${payload.text}" pada ${payload.date}.`);
+            }
+            
+            closeTodoModal(); selectedDate = payload.date; renderDashboardData(); if(!document.getElementById('tab-calendar').classList.contains('hidden')) renderCalendar();
         });
 
         function toggleTodo(id) {
@@ -693,6 +833,8 @@
                 </div>
             `).join('') : '<p class="text-xs text-gray-400 italic">Jadilah yang pertama untuk komen!</p>';
 
+            const editBtnHtml = checkEditPermission(todo.addedBy) ? `<button onclick="openTodoModal(${todo.id})" class="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg transition-colors shadow-sm ml-2"><i data-lucide="edit-2" class="w-4 h-4 inline"></i> Edit</button>` : '';
+
             const detailHTML = `<div class="text-left space-y-3 mt-2">
                 <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center"><span class="text-xs text-gray-500 uppercase font-semibold">Status</span><span class="text-sm">${statusHTML}</span></div>
                 <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center"><span class="text-xs text-gray-500 uppercase font-semibold">Tarikh</span><span class="text-sm font-medium text-gray-800">${todo.date}</span></div>
@@ -701,9 +843,12 @@
                 ${(todo.link || todo.pdf) ? `<div class="pt-2 flex flex-col gap-2">${todo.link ? `<a href="${todo.link}" target="_blank" class="inline-flex items-center text-xs font-bold bg-blue-100 text-blue-700 px-3 py-2 rounded-lg"><i data-lucide="external-link" class="w-4 h-4 mr-2"></i> Buka Pautan</a>` : ''}${todo.pdf ? `<button onclick="showToast('Simulasi muat turun: ${todo.pdf}', 'info')" class="inline-flex justify-center text-xs font-bold bg-red-100 text-red-700 px-3 py-2 rounded-lg"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Muat Turun ${todo.pdf}</button>` : ''}</div>` : ''}
                 
                 <div class="mt-4 border-t border-gray-100 pt-4">
-                    <button onclick="likeItem('todo', ${todo.id})" class="flex items-center space-x-2 text-xs font-bold text-pink-600 bg-pink-50 hover:bg-pink-100 px-4 py-2 rounded-lg transition-colors shadow-sm">
-                        <i data-lucide="heart" class="w-4 h-4 ${todo.likes > 0 ? 'fill-pink-500' : ''}"></i> <span>Suka (${todo.likes || 0})</span>
-                    </button>
+                    <div class="flex justify-between items-center">
+                        <button onclick="likeItem('todo', ${todo.id})" class="flex items-center space-x-2 text-xs font-bold text-pink-600 bg-pink-50 hover:bg-pink-100 px-4 py-2 rounded-lg transition-colors shadow-sm">
+                            <i data-lucide="heart" class="w-4 h-4 ${todo.likes > 0 ? 'fill-pink-500' : ''}"></i> <span>Suka (${todo.likes || 0})</span>
+                        </button>
+                        ${editBtnHtml}
+                    </div>
                     <div class="mt-4">
                         <h4 class="text-xs font-bold text-gray-700 mb-2">Ruangan Komen:</h4>
                         <div class="bg-gray-50 rounded-lg p-2 max-h-32 overflow-y-auto mb-2 custom-scrollbar border border-gray-100">${commentsHtml}</div>
@@ -717,7 +862,57 @@
             showMiniWindow(todo.text, detailHTML, "info", "Tutup");
         }
 
-        // --- PROGRAM LIKES & COMMENTS ---
+        // --- CRUD PROGRAM ---
+        function openProgramModal(id = null) { 
+            editProgramId = id; 
+            document.getElementById('modalTitleProgram').innerText = id ? "Kemaskini Program" : "Tambah Program";
+            document.getElementById('programForm').reset();
+            if(id) {
+                const p = programs.find(x => x.id === id);
+                if(p) {
+                    document.getElementById('progTitle').value = p.title;
+                    document.getElementById('progDate').value = String(p.date).split('T')[0];
+                    document.getElementById('progLocation').value = p.location;
+                    document.getElementById('progStatus').value = p.status || 'Akan Datang';
+                }
+            }
+            if(id) closeMiniWindow();
+            document.getElementById('programModal').classList.remove('hidden'); document.getElementById('programModal').classList.add('flex'); 
+        }
+        function closeProgramModal() { editProgramId = null; document.getElementById('programModal').classList.add('hidden'); document.getElementById('programModal').classList.remove('flex'); document.getElementById('programForm').reset(); }
+
+        document.getElementById('programForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                title: document.getElementById('progTitle').value,
+                date: document.getElementById('progDate').value,
+                location: document.getElementById('progLocation').value,
+                status: document.getElementById('progStatus').value,
+                addedBy: currentUser.name
+            };
+            
+            if (editProgramId) {
+                const idx = programs.findIndex(p => p.id === editProgramId);
+                if(idx > -1) {
+                    programs[idx] = { ...programs[idx], ...payload, addedBy: programs[idx].addedBy };
+                    if(gasEndpointUrl) {
+                        const dbPayload = {...programs[idx]}; dbPayload.comments = JSON.stringify(dbPayload.comments || []);
+                        apiCall('update', 'Programs', dbPayload);
+                    }
+                    showToast("Program dikemaskini.", "success");
+                }
+            } else {
+                payload.id = Date.now(); payload.completed = false; payload.likes = 0; payload.comments = [];
+                programs.push(payload);
+                if(gasEndpointUrl) {
+                    const dbPayload = {...payload}; dbPayload.comments = JSON.stringify(dbPayload.comments);
+                    apiCall('create', 'Programs', dbPayload);
+                }
+                showToast("Program ditambah.", "success");
+            }
+            closeProgramModal(); renderPrograms(); renderDashboardData();
+        });
+
         function viewProgramDetails(id) {
             const p = programs.find(x => x.id === id); if(!p) return;
             let commentsHtml = (p.comments || []).length > 0 ? (p.comments).map(c => `
@@ -727,15 +922,20 @@
                 </div>
             `).join('') : '<p class="text-xs text-gray-400 italic">Jadilah yang pertama untuk komen!</p>';
 
+            const editBtnHtml = checkEditPermission(p.addedBy) ? `<button onclick="openProgramModal(${p.id})" class="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg transition-colors shadow-sm ml-2"><i data-lucide="edit-2" class="w-4 h-4 inline"></i> Edit</button>` : '';
+
             const detailHTML = `<div class="text-left space-y-3 mt-2">
                 <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center"><span class="text-xs text-gray-500 uppercase font-semibold">Status</span><span class="text-sm font-bold ${p.completed ? 'text-gray-500' : 'text-blue-600'}">${p.completed ? 'Selesai' : p.status}</span></div>
                 <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center"><span class="text-xs text-gray-500 uppercase font-semibold">Tarikh</span><span class="text-sm font-medium text-gray-800">${p.date}</span></div>
                 <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center"><span class="text-xs text-gray-500 uppercase font-semibold">Lokasi</span><span class="text-sm font-medium text-gray-800">${p.location}</span></div>
                 
                 <div class="mt-4 border-t border-gray-100 pt-4">
-                    <button onclick="likeItem('program', ${p.id})" class="flex items-center space-x-2 text-xs font-bold text-pink-600 bg-pink-50 hover:bg-pink-100 px-4 py-2 rounded-lg transition-colors shadow-sm">
-                        <i data-lucide="heart" class="w-4 h-4 ${p.likes > 0 ? 'fill-pink-500' : ''}"></i> <span>Suka (${p.likes || 0})</span>
-                    </button>
+                    <div class="flex justify-between items-center">
+                        <button onclick="likeItem('program', ${p.id})" class="flex items-center space-x-2 text-xs font-bold text-pink-600 bg-pink-50 hover:bg-pink-100 px-4 py-2 rounded-lg transition-colors shadow-sm">
+                            <i data-lucide="heart" class="w-4 h-4 ${p.likes > 0 ? 'fill-pink-500' : ''}"></i> <span>Suka (${p.likes || 0})</span>
+                        </button>
+                        ${editBtnHtml}
+                    </div>
                     <div class="mt-4">
                         <h4 class="text-xs font-bold text-gray-700 mb-2">Ruangan Komen:</h4>
                         <div class="bg-gray-50 rounded-lg p-2 max-h-32 overflow-y-auto mb-2 custom-scrollbar border border-gray-100">${commentsHtml}</div>
@@ -750,17 +950,57 @@
         }
 
 
-        // --- CRUD PAUTAN, PENGGUNA, PROFIL ---
-        function openAddLinkModal() { document.getElementById('addLinkModal').classList.remove('hidden'); document.getElementById('addLinkModal').classList.add('flex'); }
-        function closeAddLinkModal() { document.getElementById('addLinkModal').classList.add('hidden'); document.getElementById('addLinkModal').classList.remove('flex'); document.getElementById('addLinkForm').reset(); }
-        document.getElementById('addLinkForm').addEventListener('submit', async (e) => { e.preventDefault(); const newLink = { id: Date.now(), title: document.getElementById('addLinkTitle').value, url: document.getElementById('addLinkUrl').value, desc: document.getElementById('addLinkDesc').value, addedBy: currentUser.name }; linksRepo.push(newLink); if(gasEndpointUrl) apiCall('create', 'Links', newLink); closeAddLinkModal(); renderLinks(); showToast("Pautan ditambah.", "success"); });
+        // --- CRUD PAUTAN ---
+        function openLinkModal(id = null) { 
+            editLinkId = id; 
+            document.getElementById('modalTitleLink').innerText = id ? "Kemaskini Pautan" : "Tambah Pautan";
+            document.getElementById('linkForm').reset();
+            if(id) {
+                const l = linksRepo.find(x => x.id === id);
+                if(l) {
+                    document.getElementById('addLinkTitle').value = l.title;
+                    document.getElementById('addLinkUrl').value = l.url;
+                    document.getElementById('addLinkDesc').value = l.desc || '';
+                }
+            }
+            document.getElementById('linkModal').classList.remove('hidden'); document.getElementById('linkModal').classList.add('flex'); 
+        }
+        function closeLinkModal() { editLinkId = null; document.getElementById('linkModal').classList.add('hidden'); document.getElementById('linkModal').classList.remove('flex'); document.getElementById('linkForm').reset(); }
+        
+        document.getElementById('linkForm').addEventListener('submit', async (e) => { 
+            e.preventDefault(); 
+            const payload = { title: document.getElementById('addLinkTitle').value, url: document.getElementById('addLinkUrl').value, desc: document.getElementById('addLinkDesc').value, addedBy: currentUser.name };
+            
+            if (editLinkId) {
+                const idx = linksRepo.findIndex(x => x.id === editLinkId);
+                if(idx > -1) {
+                    linksRepo[idx] = { ...linksRepo[idx], ...payload, addedBy: linksRepo[idx].addedBy };
+                    if(gasEndpointUrl) apiCall('update', 'Links', linksRepo[idx]);
+                    showToast("Pautan dikemaskini.", "success");
+                }
+            } else {
+                payload.id = Date.now();
+                linksRepo.push(payload); 
+                if(gasEndpointUrl) apiCall('create', 'Links', payload); 
+                showToast("Pautan ditambah.", "success"); 
+            }
+            closeLinkModal(); renderLinks(); 
+        });
 
-        function openAddUserModal() { document.getElementById('addUserModal').classList.remove('hidden'); document.getElementById('addUserModal').classList.add('flex'); }
-        function closeAddUserModal() { document.getElementById('addUserModal').classList.add('hidden'); document.getElementById('addUserModal').classList.remove('flex'); document.getElementById('addUserForm').reset(); }
-        document.getElementById('addUserForm').addEventListener('submit', async (e) => { e.preventDefault(); const em = document.getElementById('newUserEmail').value; if(usersData.some(u => String(u.email).toLowerCase() === em.toLowerCase())) return showToast("E-mel wujud.", "error"); const newUser = { id: 'PKG' + Date.now(), name: document.getElementById('newUserName').value, station: '', email: em, phone: '', password: document.getElementById('newUserPassword').value, role: document.getElementById('newUserRole').value }; usersData.push(newUser); if(gasEndpointUrl) apiCall('create', 'Users', newUser); closeAddUserModal(); renderAdminUsers(); showToast("Pengguna didaftarkan!", "success"); });
+        // --- CRUD PENGGUNA (ADMIN) ---
+        function openUserModal() { document.getElementById('userModal').classList.remove('hidden'); document.getElementById('userModal').classList.add('flex'); }
+        function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); document.getElementById('userModal').classList.remove('flex'); document.getElementById('userForm').reset(); }
+        
+        document.getElementById('userForm').addEventListener('submit', async (e) => { 
+            e.preventDefault(); const em = document.getElementById('newUserEmail').value; 
+            if(usersData.some(u => String(u.email).toLowerCase() === em.toLowerCase())) return showToast("E-mel wujud.", "error"); 
+            const newUser = { id: 'PKG' + Date.now(), name: document.getElementById('newUserName').value, station: '', email: em, phone: '', password: document.getElementById('newUserPassword').value, role: document.getElementById('newUserRole').value }; 
+            usersData.push(newUser); if(gasEndpointUrl) apiCall('create', 'Users', newUser); closeUserModal(); renderAdminUsers(); showToast("Pengguna didaftarkan!", "success"); 
+        });
 
         function toggleUserRole(userId) { const idx = usersData.findIndex(u => String(u.id) === String(userId)); if(idx > -1) { usersData[idx].role = usersData[idx].role === 'Admin' ? 'Pengguna' : 'Admin'; if(gasEndpointUrl) apiCall('update', 'Users', usersData[idx]); renderAdminUsers(); showToast("Peranan ditukar", "success"); } }
 
+        // --- PROFIL ---
         document.getElementById('profileForm').addEventListener('submit', (e) => { e.preventDefault(); const idx = usersData.findIndex(u => String(u.email) === String(currentUser.email)); if(idx > -1) { usersData[idx].name = document.getElementById('profName').value; usersData[idx].password = document.getElementById('profPass').value; currentUser = { ...usersData[idx] }; if(gasEndpointUrl) apiCall('update', 'Users', usersData[idx]); showToast("Profil dikemaskini!", "success"); document.getElementById('userName').innerText = currentUser.name; document.getElementById('userInitial').innerText = currentUser.name.charAt(0); } });
 
         document.getElementById('appSettingsForm').addEventListener('submit', (e) => { e.preventDefault(); gasEndpointUrl = document.getElementById('setGasUrl').value.trim(); localStorage.setItem('pkg_gas_url', gasEndpointUrl); showToast("URL Disimpan!", "success"); });
@@ -826,16 +1066,17 @@
             document.getElementById('programsContainer').innerHTML = programs.map(p => `<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative group cursor-pointer hover:border-blue-200" onclick="toggleProgram(${p.id})"><div class="w-1.5 h-full ${p.completed ? 'bg-gray-300' : 'bg-blue-500'} absolute left-0 top-0"></div><div class="p-5 pl-6"><div class="flex justify-between items-start mb-3"><span class="text-[10px] font-bold ${p.completed ? 'text-gray-500 bg-gray-100' : 'text-blue-700 bg-blue-50'} px-2.5 py-1 rounded-md uppercase flex items-center">${p.completed ? '<i data-lucide="check-circle-2" class="w-3 h-3 mr-1"></i> Selesai' : p.status}</span><div class="flex space-x-1"><button class="text-gray-300 hover:text-blue-600 p-1" onclick="viewProgramDetails(${p.id}); event.stopPropagation();" title="Lihat & Komen"><i data-lucide="eye" class="w-4 h-4"></i></button></div></div><h3 class="font-bold ${p.completed ? 'text-gray-400 line-through italic' : 'text-gray-800'} mb-4 text-sm">${p.title}</h3><div class="space-y-2 text-xs text-gray-500 bg-gray-50 p-3 rounded-xl"><div class="flex items-center"><i data-lucide="calendar" class="w-3.5 h-3.5 mr-2"></i> ${p.date}</div><div class="flex items-center"><i data-lucide="map-pin" class="w-3.5 h-3.5 mr-2"></i> ${p.location}</div><div class="flex items-center pt-1 mt-1 border-t border-gray-200"><span class="text-pink-500 font-bold flex items-center mr-3"><i data-lucide="heart" class="w-3 h-3 mr-1 ${p.likes?'fill-pink-500':''}"></i>${p.likes||0}</span><span class="text-blue-500 font-bold flex items-center"><i data-lucide="message-square" class="w-3 h-3 mr-1"></i>${(p.comments||[]).length} Komen</span></div></div></div></div>`).join('') || '<p class="text-sm text-gray-500">Tiada program direkodkan.</p>';
             lucide.createIcons();
         }
-        function toggleProgram(id) { const i = programs.findIndex(p => p.id === id); if(i > -1) { programs[i].completed = !programs[i].completed; 
-        
-        // Simpan semula ke GAS kalau wujud URL
-        const payload = {...programs[i]}; payload.comments = JSON.stringify(payload.comments);
-        if(gasEndpointUrl) apiCall('update', 'Programs', payload); 
-        
-        if(!document.getElementById('tab-programs').classList.contains('hidden')) renderPrograms(); renderDashboardData(); } }
+        function toggleProgram(id) { const i = programs.findIndex(p => p.id === id); if(i > -1) { programs[i].completed = !programs[i].completed; const payload = {...programs[i]}; payload.comments = JSON.stringify(payload.comments); if(gasEndpointUrl) apiCall('update', 'Programs', payload); if(!document.getElementById('tab-programs').classList.contains('hidden')) renderPrograms(); renderDashboardData(); } }
 
         function renderLinks() {
-            document.getElementById('linksContainer').innerHTML = linksRepo.map(link => `<div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col hover:border-blue-200"><div class="flex justify-between items-start mb-3"><div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mr-3"><i data-lucide="link" class="w-5 h-5"></i></div><h3 class="font-bold text-gray-800 text-sm flex-1 pt-1">${link.title}</h3><a href="${link.url}" target="_blank" class="p-2 bg-gray-50 text-gray-400 hover:text-blue-600 rounded-lg"><i data-lucide="external-link" class="w-4 h-4"></i></a></div><p class="text-xs text-gray-500 mb-4 bg-gray-50 p-3 rounded-xl flex-1">${link.desc}</p><div class="flex justify-between items-center"><span class="text-[10px] text-gray-400 font-medium"><i data-lucide="user" class="w-3 h-3 inline mr-0.5"></i> ${link.addedBy}</span></div></div>`).join('') || '<p class="text-sm text-gray-500">Tiada pautan.</p>';
+            document.getElementById('linksContainer').innerHTML = linksRepo.map(link => `
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col hover:border-blue-200">
+                <div class="flex justify-between items-start mb-3"><div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mr-3"><i data-lucide="link" class="w-5 h-5"></i></div><h3 class="font-bold text-gray-800 text-sm flex-1 pt-1">${link.title}</h3><a href="${link.url}" target="_blank" class="p-2 bg-gray-50 text-gray-400 hover:text-blue-600 rounded-lg"><i data-lucide="external-link" class="w-4 h-4"></i></a></div>
+                <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-3 rounded-xl flex-1">${link.desc}</p>
+                <div class="flex justify-between items-center"><span class="text-[10px] text-gray-400 font-medium"><i data-lucide="user" class="w-3 h-3 inline mr-0.5"></i> ${link.addedBy}</span>
+                ${checkEditPermission(link.addedBy) ? `<button onclick="openLinkModal(${link.id})" class="text-[10px] font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 px-2 py-1 rounded"><i data-lucide="edit-2" class="w-3 h-3 inline"></i> Edit</button>` : ''}
+                </div>
+            </div>`).join('') || '<p class="text-sm text-gray-500">Tiada pautan.</p>';
             lucide.createIcons();
         }
 
@@ -848,23 +1089,36 @@
             document.getElementById('adminUserList').innerHTML = usersData.map(user => `<div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100"><div class="flex items-center"><div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs mr-3">${user.name.charAt(0)}</div><div><p class="text-sm font-bold">${user.name}</p><p class="text-[10px] text-gray-500">${user.email}</p></div></div>${user.email !== currentUser.email ? `<button onclick="toggleUserRole('${user.id}')" class="text-[10px] font-bold bg-white border px-2 py-1.5 rounded hover:bg-gray-100">Tukar ${user.role==='Admin'?'Ke Pengguna':'Ke Admin'}</button>` : '<span class="text-xs italic text-gray-400">Anda</span>'}</div>`).join('');
         }
 
-        // --- CHATBOT ---
-        const chatForm = document.getElementById('chatForm'); const chatInput = document.getElementById('chatInput'); const chatMessages = document.getElementById('chatMessages');
+        // --- CHATBOT FIX ---
+        const chatForm = document.getElementById('chatForm'); const chatInput = document.getElementById('chatInput'); const chatMessages = document.getElementById('chatMessages'); const chatSubmitBtn = document.getElementById('chatSubmitBtn');
         function scrollToBottom() { chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' }); }
         
+        chatInput.addEventListener('input', () => { chatSubmitBtn.disabled = chatInput.value.trim() === ''; });
+
         chatForm.addEventListener('submit', (e) => {
             e.preventDefault(); const text = chatInput.value.trim(); if(!text) return;
-            chatMessages.insertAdjacentHTML('beforeend', `<div class="flex justify-end animate-fade-in"><div class="max-w-[85%] rounded-2xl p-3 shadow-sm bg-blue-600 text-white rounded-tr-none"><p class="text-sm">${text}</p></div></div>`);
-            chatInput.value = ''; scrollToBottom();
+            
+            chatSubmitBtn.disabled = true;
+            chatInput.value = ''; 
+            
+            chatMessages.insertAdjacentHTML('beforeend', `<div class="flex justify-end animate-fade-in"><div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm bg-blue-600 text-white rounded-tr-none"><p class="text-sm">${text}</p></div></div>`);
+            scrollToBottom();
+
+            const typingId = 'typing-' + Date.now();
+            chatMessages.insertAdjacentHTML('beforeend', `<div id="${typingId}" class="flex justify-start animate-fade-in"><div class="bg-white border border-gray-100 rounded-2xl rounded-tl-none p-4 shadow-sm flex space-x-1.5"><div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div><div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div><div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 300ms"></div></div></div>`);
+            scrollToBottom();
 
             setTimeout(() => {
+                const typingEl = document.getElementById(typingId); if(typingEl) typingEl.remove();
                 const lt = text.toLowerCase(); let res = "Maaf, boleh tanya tentang <b>status</b>, <b>program</b>, atau <b>hari ini</b>.";
                 if (lt.includes('hari ini')) { const td = todos.filter(t => String(t.date).split('T')[0] === currentDateStr); res = td.length > 0 ? `Anda ada <b>${td.length} rekod</b> hari ini. Utama: "${td[0].text}".` : `Tiada rekod kalendar untuk hari ini.`; }
                 else if (lt.includes('status') || lt.includes('todo')) { const p = todos.filter(t => !t.completed).length; res = `Terdapat <b>${p} tugasan aktif</b> dalam jadual keseluruhan.`; }
                 else if (lt.includes('program')) { res = programs.length ? `Terdapat <b>${programs.length}</b> program berdaftar dalam direktori.` : "Tiada program berdaftar."; }
                 else if (lt.includes('salam') || lt.includes('hai')) { res = `Salam sejahtera, bos! Saya AI sedia membantu.`; }
-                chatMessages.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-fade-in"><div class="max-w-[85%] rounded-2xl p-4 shadow-sm bg-white border border-gray-100 text-gray-800 rounded-tl-none"><p class="text-sm">${res}</p></div></div>`);
+                
+                chatMessages.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-fade-in"><div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm bg-white border border-gray-100 text-gray-800 rounded-tl-none"><p class="text-sm">${res}</p></div></div>`);
                 scrollToBottom();
+                lucide.createIcons();
             }, 800); 
         });
 
