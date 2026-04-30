@@ -256,7 +256,11 @@
                         </div>
                     </div>
                     <div id="chatMessages" class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-4 bg-gray-50/50">
-                        <div class="flex justify-start"><div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm bg-white border border-gray-100 text-gray-800 rounded-tl-none"><p class="text-sm">Salam sejahtera. Saya Pembantu AI PKG Sarawak. Boleh tanya tentang <b>status tugas</b>, <b>program</b>, atau jadual <b>hari ini</b>.</p></div></div>
+                        <div class="flex justify-start" id="aiWelcomeMsgBox">
+                            <div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm bg-white border border-gray-100 text-gray-800 rounded-tl-none">
+                                <p class="text-sm" id="aiWelcomeMsg">Salam sejahtera. Sila log masuk dahulu.</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="p-4 bg-white border-t border-gray-100">
                         <form id="chatForm" class="flex items-center bg-gray-50 border border-gray-200 rounded-2xl p-1.5 pl-4 focus-within:ring-2 focus-within:ring-blue-500 transition-all shadow-inner">
@@ -727,6 +731,9 @@
 
                 document.getElementById('loginView').classList.add('hidden'); document.getElementById('appView').classList.remove('hidden');
                 
+                // SET SAPAAN AI KHAS DI TAB CHATBOT
+                document.getElementById('aiWelcomeMsg').innerHTML = `Hi kak/bos <b>${currentUser.name.split(' ')[0]}</b>! Hari ni nak tanya apa kat kamek? Boleh je kalau nak cek jadual, pautan, kalendar ke, atau program. Padah je!`;
+
                 showMiniWindow("Selamat Datang, Pasukan Hebat!", 
                     `<div class='space-y-4'><img src='https://i.pinimg.com/originals/02/f7/e4/02f7e4be58fe95576c969783b1f4cc8f.png' class='w-full max-h-40 object-contain mx-auto drop-shadow-md rounded-xl'><p class='text-[14px] font-bold text-blue-800 bg-blue-50 p-3 rounded-xl border border-blue-100'>Hi USTP hebat, anda memang hebat, bersabar dan jaga kesihatan mental masing-masing. Fighting!</p><p class='text-xs text-gray-600 italic bg-gray-50 p-3 rounded-xl border border-gray-100'>"${stressMotivations[Math.floor(Math.random() * stressMotivations.length)]}"</p></div>`, 
                     "info", "Terima Kasih");
@@ -1089,13 +1096,37 @@
             document.getElementById('adminUserList').innerHTML = usersData.map(user => `<div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100"><div class="flex items-center"><div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs mr-3">${user.name.charAt(0)}</div><div><p class="text-sm font-bold">${user.name}</p><p class="text-[10px] text-gray-500">${user.email}</p></div></div>${user.email !== currentUser.email ? `<button onclick="toggleUserRole('${user.id}')" class="text-[10px] font-bold bg-white border px-2 py-1.5 rounded hover:bg-gray-100">Tukar ${user.role==='Admin'?'Ke Pengguna':'Ke Admin'}</button>` : '<span class="text-xs italic text-gray-400">Anda</span>'}</div>`).join('');
         }
 
+        // --- GEMINI AI INTEGRATION ---
+        async function fetchGeminiWithRetry(query, contextData, sysPrompt, retries = 5) {
+            const apiKey = ""; // API Key disuntik oleh persekitaran runtime
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: contextData + "\n\nSoalan Pengguna: " + query }] }],
+                systemInstruction: { parts: [{ text: sysPrompt }] }
+            };
+
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf bos, kamek kurang pasti bab tu.";
+                } catch (error) {
+                    if (i === retries - 1) return "Aduh, sistem kamek tengah pening sikit kinek tok. Cuba lagik kelak ya bos!";
+                    await new Promise(res => setTimeout(res, delays[i]));
+                }
+            }
+        }
+
         // --- CHATBOT FIX ---
         const chatForm = document.getElementById('chatForm'); const chatInput = document.getElementById('chatInput'); const chatMessages = document.getElementById('chatMessages'); const chatSubmitBtn = document.getElementById('chatSubmitBtn');
         function scrollToBottom() { chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' }); }
         
         chatInput.addEventListener('input', () => { chatSubmitBtn.disabled = chatInput.value.trim() === ''; });
 
-        chatForm.addEventListener('submit', (e) => {
+        chatForm.addEventListener('submit', async (e) => {
             e.preventDefault(); const text = chatInput.value.trim(); if(!text) return;
             
             chatSubmitBtn.disabled = true;
@@ -1108,18 +1139,32 @@
             chatMessages.insertAdjacentHTML('beforeend', `<div id="${typingId}" class="flex justify-start animate-fade-in"><div class="bg-white border border-gray-100 rounded-2xl rounded-tl-none p-4 shadow-sm flex space-x-1.5"><div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div><div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div><div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 300ms"></div></div></div>`);
             scrollToBottom();
 
-            setTimeout(() => {
-                const typingEl = document.getElementById(typingId); if(typingEl) typingEl.remove();
-                const lt = text.toLowerCase(); let res = "Maaf, boleh tanya tentang <b>status</b>, <b>program</b>, atau <b>hari ini</b>.";
-                if (lt.includes('hari ini')) { const td = todos.filter(t => String(t.date).split('T')[0] === currentDateStr); res = td.length > 0 ? `Anda ada <b>${td.length} rekod</b> hari ini. Utama: "${td[0].text}".` : `Tiada rekod kalendar untuk hari ini.`; }
-                else if (lt.includes('status') || lt.includes('todo')) { const p = todos.filter(t => !t.completed).length; res = `Terdapat <b>${p} tugasan aktif</b> dalam jadual keseluruhan.`; }
-                else if (lt.includes('program')) { res = programs.length ? `Terdapat <b>${programs.length}</b> program berdaftar dalam direktori.` : "Tiada program berdaftar."; }
-                else if (lt.includes('salam') || lt.includes('hai')) { res = `Salam sejahtera, bos! Saya AI sedia membantu.`; }
-                
-                chatMessages.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-fade-in"><div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm bg-white border border-gray-100 text-gray-800 rounded-tl-none"><p class="text-sm">${res}</p></div></div>`);
-                scrollToBottom();
-                lucide.createIcons();
-            }, 800); 
+            // Bina Konteks Data Semasa untuk Gemini
+            const contextData = `
+Maklumat Sistem Pengurusan PKG:
+- Tarikh Hari Ini: ${currentDateStr}
+- Nama Pengguna: ${currentUser.name} (${currentUser.role})
+
+Senarai Tugasan/Kalendar:
+${JSON.stringify(todos.map(t => ({tajuk: t.text, tarikh: t.date, status: t.completed ? 'Selesai' : 'Tertunggak/Aktif', catatan: t.notes}))) }
+
+Senarai Program:
+${JSON.stringify(programs.map(p => ({tajuk: p.title, tarikh: p.date, lokasi: p.location, status: p.status}))) }
+
+Senarai Pautan Sistem:
+${JSON.stringify(linksRepo.map(l => ({tajuk: l.title, url: l.url, info: l.desc}))) }
+            `;
+            
+            const sysPrompt = "Anda adalah Pembantu AI untuk sistem Pengurusan PKG Sarawak. Anda mesti sentiasa menjawab dalam bahasa Melayu berunsurkan loghat/kasual Sarawak yang mesra dan kelakar (contoh: guna 'kamek', 'kitak', 'bos', 'aok', 'sik', 'padah', 'mok', 'bah'). Rujuk kepada 'Maklumat Sistem Pengurusan PKG' untuk menjawab persoalan mengenai jadual, program, atau pautan. Jawab dengan ringkas dan ceria tanpa menggunakan *asterisks* (**) tebal secara berlebihan.";
+
+            const aiResponse = await fetchGeminiWithRetry(text, contextData, sysPrompt);
+
+            const typingEl = document.getElementById(typingId); if(typingEl) typingEl.remove();
+            
+            chatMessages.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-fade-in"><div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm bg-white border border-gray-100 text-gray-800 rounded-tl-none"><p class="text-sm">${aiResponse.replace(/\n/g, '<br>')}</p></div></div>`);
+            scrollToBottom();
+            lucide.createIcons();
+            chatSubmitBtn.disabled = false;
         });
 
     </script>
