@@ -412,6 +412,10 @@
                         <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Muat Naik PDF Rujukan</label>
                         <input type="file" id="addPdf" accept="application/pdf" class="w-full border border-gray-200 rounded-xl p-2.5 text-sm text-gray-600 bg-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 transition-colors">
                     </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wider">Catatan / Maklumat Berkaitan</label>
+                        <textarea id="addNotes" rows="3" class="w-full border border-gray-200 rounded-xl p-3 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50" placeholder="Masukkan catatan tambahan jika ada..."></textarea>
+                    </div>
                     <button type="submit" class="w-full bg-blue-600 text-white font-medium py-3.5 rounded-xl hover:bg-blue-700 transition-transform active:scale-95 mt-4 shadow-md flex justify-center items-center">
                         <i data-lucide="save" class="w-4 h-4 mr-2"></i> Simpan Tugasan
                     </button>
@@ -563,25 +567,15 @@
             logoUrl: ''
         };
 
-        // Fallback Local Arrays jika tiada sambungan DB
+        // Data dikosongkan (Keluarkan Mock Data). Hanya 1 Admin dibiarkan sebagai 'backdoor' keselamatan.
         let usersData = [
-            { id: 1, name: 'Mohd Shahrol', station: 'PKG Sarikei', email: 'mohd.shahrol@moe.gov.my', phone: '012-3456789', password: 'password', role: 'Admin' },
-            { id: 2, name: 'Pegawai PKG', station: 'PKG Kuching', email: 'pegawai@moe.gov.my', phone: '019-8765432', password: 'password', role: 'Pengguna' }
+            { id: 'admin1', name: 'Mohd Shahrol', station: 'PKG Sarawak', email: 'mohd.shahrol@moe.gov.my', phone: '012-3456789', password: 'password', role: 'Admin' }
         ];
 
         let linksRepo = [];
-        let todos = [
-            { id: 1, text: 'Hantar Laporan Suku Pertama ke JPN', completed: false, priority: 'high', date: currentDateStr, link: '', pdf: '' },
-            { id: 2, text: 'Mesyuarat bersama Guru Besar', completed: true, priority: 'medium', date: currentDateStr, link: 'https://meet.google.com/abc', pdf: '' }
-        ];
-        let programs = [
-            { id: 1, title: 'Bengkel Pembestarian Pendidikan', date: 'Bulan Hadapan', location: 'Makmal Komputer', status: 'Akan Datang', type: 'bengkel' }
-        ];
-        
-        const checklists = [
-            { id: 1, title: 'Pemeriksaan Bilik Server', progress: 80, items: 10, completedItems: 8 },
-            { id: 2, title: 'Penyelenggaraan ChromeBook', progress: 100, items: 15, completedItems: 15 },
-        ];
+        let todos = [];
+        let programs = [];
+        let checklists = [];
 
         // Memaparkan tarikh semasa di Dashboard
         document.getElementById('currentDateDisplayDashboard').innerText = new Date().toLocaleDateString('ms-MY', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -817,7 +811,7 @@
             if (foundUser) {
                 currentUser = { ...foundUser };
 
-                document.getElementById('greetingText').innerText = `Selamat Pagi, ${currentUser.name.split(' ')[0]}`;
+                document.getElementById('greetingText').innerText = `Hai, ${currentUser.name.split(' ')[0]}`;
                 const badge = document.getElementById('userRoleBadge');
                 badge.innerText = currentUser.role;
                 
@@ -837,7 +831,26 @@
                 mainContent.classList.remove('hidden');
                 bottomNav.classList.remove('hidden');
                 
-                showToast("Log masuk berjaya!", "success");
+                // --- KATA SEMANGAT LUCU & SAPAAN KHAS ---
+                const funnyQuotes = [
+                    "Kerja keraslah sampai jiran fikir awak main bomoh. Tapi jangan lupa rehat, kita bukan robot!",
+                    "Jangan stress sangat. Kalau kerja tak siap hari ni, kan ada esok. Kalau esok tak siap... siap sedia la kena soal jawab.",
+                    "Jadilah seperti kura-kura, biar lambat asalkan... eh tak boleh, bos nak report petang ni juga! Fighting!",
+                    "Kesihatan mental tu penting. Kalau rasa nak marah, tarik nafas panjang-panjang... lepas tu pergi makan.",
+                    "Terus semangat! Ingat, komitmen bulanan dan bil elektrik sentiasa menanti anda dengan setia.",
+                    "Kalau rasa penat bekerja, ingatlah masa anda tak berduit. Mana lagi penat? Haa, sambung buat kerja.",
+                    "Rehat sekejap. Bos tak nampak tu. Tapi jangan sampai tertidur terus pulak!",
+                    "Tugasan yang berat akan terasa ringan jika kita... suruh orang lain buat. (Gurau je, siapkan sendiri ya!)"
+                ];
+                const randomQuote = funnyQuotes[Math.floor(Math.random() * funnyQuotes.length)];
+                
+                showMiniWindow(
+                    "Selamat Datang, Pasukan Hebat!", 
+                    "<div class='space-y-4'><img src='https://i.pinimg.com/originals/02/f7/e4/02f7e4be58fe95576c969783b1f4cc8f.png' alt='Motivasi' class='w-full max-h-48 object-contain mx-auto drop-shadow-md rounded-xl'><p class='text-[15px] font-bold text-blue-800 bg-blue-50 p-3 rounded-xl border border-blue-100'>Hi USTP hebat, anda memang hebat, bersabar dan jaga kesihatan mental masing-masing. Fighting!</p><p class='text-sm text-gray-600 italic bg-gray-50 p-3 rounded-xl border border-gray-100'>\"" + randomQuote + "\"</p></div>", 
+                    "info", 
+                    "Mula Bertugas"
+                );
+
                 checkNotificationStatus(); 
                 
                 if(gasEndpointUrl) {
@@ -926,6 +939,7 @@
             const date = document.getElementById('addDate').value;
             const link = document.getElementById('addLink').value;
             const pdfFile = document.getElementById('addPdf').files[0];
+            const notes = document.getElementById('addNotes').value;
 
             const newTodo = {
                 id: Date.now(),
@@ -934,7 +948,9 @@
                 priority: 'medium',
                 date: date,
                 link: link,
-                pdf: pdfFile ? pdfFile.name : ''
+                pdf: pdfFile ? pdfFile.name : '',
+                notes: notes,
+                addedBy: currentUser.name
             };
 
             todos.push(newTodo);
@@ -1167,17 +1183,59 @@
             document.getElementById('stat-todos').innerText = pendingTodos;
             document.getElementById('stat-programs').innerText = programs.length;
 
-            const todoHTML = todos.filter(t => !t.completed).map(todo => `
-                <div class="flex items-center p-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition cursor-pointer" onclick="toggleTodo(${todo.id})">
-                    <div class="mr-3 mt-0.5">
-                        <i data-lucide="circle" class="text-gray-300 w-5 h-5"></i>
-                    </div>
-                    <span class="text-sm flex-1 text-gray-700 font-medium">
-                        ${todo.text}
-                    </span>
-                    ${todo.priority === 'high' ? `<span class="w-2 h-2 rounded-full bg-red-500 ml-2"></span>` : ''}
-                </div>
-            `).join('') || '<p class="p-4 text-xs text-center text-gray-400">Tiada tugasan aktif untuk hari ini.</p>';
+            // Dapatkan tarikh hari ini tanpa mengira masa untuk perbandingan
+            const todayObj = new Date(currentDateStr);
+            todayObj.setHours(0,0,0,0);
+
+            // Susun mengikut tarikh terdekat, dan bina HTML (Jangan hilangkan yang dah selesai)
+            const todoHTML = todos.sort((a,b) => new Date(a.date) - new Date(b.date))
+                .map(todo => {
+                    const todoDateObj = new Date(todo.date);
+                    todoDateObj.setHours(0,0,0,0);
+                    
+                    let dateColorClass = 'text-blue-600 bg-blue-50 border-blue-200';
+                    let dateLabel = todo.date;
+                    let textClass = 'text-gray-800';
+                    let iconHtml = `<i data-lucide="circle" class="text-gray-300 w-5 h-5"></i>`;
+                    
+                    // Logik Pewarnaan Status Tarikh & Selesai
+                    if (todo.completed) {
+                        dateColorClass = 'text-gray-500 bg-gray-100 border-gray-200';
+                        dateLabel = `Selesai: ${todo.date}`;
+                        textClass = 'text-gray-400 line-through italic'; // Label digraykan, italic, gariskan
+                        iconHtml = `<i data-lucide="check-circle-2" class="text-green-500 w-5 h-5"></i>`;
+                    } else if (todoDateObj < todayObj) {
+                        dateColorClass = 'text-red-600 bg-red-50 border-red-200'; // Tertunggak (Merah)
+                        dateLabel = `Tertunggak: ${todo.date}`;
+                    } else if (todoDateObj.getTime() === todayObj.getTime()) {
+                        dateColorClass = 'text-orange-600 bg-orange-50 border-orange-200'; // Hari ini (Oren)
+                        dateLabel = `Hari Ini`;
+                    } else {
+                        dateColorClass = 'text-green-600 bg-green-50 border-green-200'; // Akan datang (Hijau)
+                    }
+
+                    return `
+                        <div class="flex items-start p-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition cursor-pointer" onclick="toggleTodo(${todo.id})">
+                            <div class="mr-3 mt-1.5">
+                                ${iconHtml}
+                            </div>
+                            <div class="flex-1 overflow-hidden">
+                                <p class="text-sm font-medium ${textClass} truncate pr-2">${todo.text}</p>
+                                <div class="flex items-center mt-1.5 space-x-2">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded border flex-shrink-0 ${dateColorClass}">
+                                        <i data-lucide="calendar" class="w-3 h-3 inline mr-0.5"></i> ${dateLabel}
+                                    </span>
+                                    <span class="text-[10px] text-gray-500 truncate flex-1">
+                                        <i data-lucide="user" class="w-3 h-3 inline mr-0.5"></i> ${todo.addedBy || 'Sistem'}
+                                    </span>
+                                </div>
+                            </div>
+                            <button onclick="viewTodoDetails(${todo.id}); event.stopPropagation();" class="ml-1 mt-1 p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors flex-shrink-0" title="Lihat Info">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+            }).join('') || '<p class="p-4 text-xs text-center text-gray-400">Tiada tugasan di dalam rekod.</p>';
             
             document.getElementById('todoListContainer').innerHTML = todoHTML;
 
@@ -1191,7 +1249,7 @@
                         <div class="bg-gradient-to-r ${c.progress === 100 ? 'from-green-500 to-green-400' : 'from-blue-600 to-blue-400'} h-2 rounded-full transition-all duration-1000 ease-out" style="width: ${c.progress}%"></div>
                     </div>
                 </div>
-            `).join('');
+            `).join('') || '<p class="text-xs text-gray-400 p-2 text-center">Tiada status semakan buat masa ini.</p>';
             document.getElementById('checklistContainer').innerHTML = checklistHTML;
             
             lucide.createIcons();
@@ -1227,7 +1285,11 @@
                 const isToday = dateStr === currentDateStr;
                 const isSelected = dateStr === selectedDate;
                 
-                const hasEvent = todos.some(t => t.date === dateStr);
+                // Pastikan format tarikh dari Google Sheets dipotong supaya sepadan (hanya ambil 10 aksara pertama atau buang T)
+                const hasEvent = todos.some(t => {
+                    const tDate = t.date ? String(t.date).split('T')[0] : '';
+                    return tDate === dateStr;
+                });
                 
                 let classes = "p-2 rounded-lg text-gray-700 flex flex-col items-center justify-center relative cursor-pointer transition-colors ";
                 
@@ -1242,8 +1304,8 @@
                 html += `
                     <div class="${classes}" onclick="selectDate('${dateStr}')">
                         <span>${i}</span>
-                        ${hasEvent && !isSelected ? `<span class="w-1.5 h-1.5 rounded-full bg-red-500 absolute bottom-1"></span>` : ''}
-                        ${hasEvent && isSelected ? `<span class="w-1.5 h-1.5 rounded-full bg-white absolute bottom-1"></span>` : ''}
+                        ${hasEvent && !isSelected ? `<span class="w-1.5 h-1.5 rounded-full bg-red-500 absolute bottom-1 shadow-sm"></span>` : ''}
+                        ${hasEvent && isSelected ? `<span class="w-1.5 h-1.5 rounded-full bg-white absolute bottom-1 shadow-sm"></span>` : ''}
                     </div>
                 `;
             }
@@ -1271,7 +1333,11 @@
         }
 
         function renderCalendarTodos() {
-            const dateTodos = todos.filter(t => t.date === selectedDate);
+            // Tapis data kalendar, pastikan ambil tarikh tanpa format masa (T)
+            const dateTodos = todos.filter(t => {
+                const tDate = t.date ? String(t.date).split('T')[0] : '';
+                return tDate === selectedDate;
+            });
             
             const dateObj = new Date(selectedDate);
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -1296,7 +1362,15 @@
                             : `<i data-lucide="circle" class="text-gray-300 w-5 h-5"></i>`}
                     </div>
                     <div class="flex-1 overflow-hidden">
-                        <p class="text-sm font-semibold truncate ${todo.completed ? 'text-gray-400 line-through' : 'text-gray-800'}">${todo.text}</p>
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1 overflow-hidden">
+                                <p class="text-sm font-semibold truncate pr-2 ${todo.completed ? 'text-gray-400 line-through italic' : 'text-gray-800'}">${todo.text}</p>
+                                <p class="text-[10px] text-gray-500 mt-0.5 flex items-center"><i data-lucide="user" class="w-3 h-3 mr-1"></i> ${todo.addedBy || 'Sistem'}</p>
+                            </div>
+                            <button onclick="viewTodoDetails(${todo.id}); event.stopPropagation();" class="text-gray-400 hover:text-blue-600 p-1 bg-gray-50 hover:bg-blue-50 rounded-md flex-shrink-0 transition-colors" title="Lihat Info">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                         
                         <div class="flex flex-wrap gap-2 mt-2">
                             ${todo.link ? `
@@ -1318,29 +1392,91 @@
         }
 
         function renderPrograms() {
-            const html = programs.map(p => `
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group">
-                    <div class="w-1.5 h-full bg-blue-500 absolute left-0 top-0"></div>
+            const html = programs.map(p => {
+                const isCompleted = p.completed;
+                const titleClass = isCompleted ? 'text-gray-400 line-through italic' : 'text-gray-800';
+                const statusClass = isCompleted ? 'text-gray-500 bg-gray-100' : 'text-blue-700 bg-blue-50';
+                
+                return `
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative group cursor-pointer hover:border-blue-200 transition-colors" onclick="toggleProgram(${p.id})">
+                    <div class="w-1.5 h-full ${isCompleted ? 'bg-gray-300' : 'bg-blue-500'} absolute left-0 top-0"></div>
                     <div class="p-4 pl-5">
                         <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
-                                ${p.status}
+                            <span class="text-[10px] font-bold ${statusClass} px-2.5 py-1 rounded-md uppercase tracking-wider flex items-center">
+                                ${isCompleted ? '<i data-lucide="check-circle-2" class="w-3 h-3 mr-1"></i> Selesai' : p.status}
                             </span>
-                            ${currentUser && currentUser.role === 'Admin' ? 
-                                `<button class="text-gray-300 hover:text-gray-600 p-1"><i data-lucide="edit-2" class="w-4 h-4"></i></button>` 
-                                : `<button class="text-gray-300 hover:text-gray-600"><i data-lucide="more-vertical" class="w-4 h-4"></i></button>`
-                            }
+                            <div class="flex items-center">
+                                ${currentUser && currentUser.role === 'Admin' ? 
+                                    `<button class="text-gray-300 hover:text-gray-600 p-1" onclick="event.stopPropagation()"><i data-lucide="edit-2" class="w-4 h-4"></i></button>` 
+                                    : `<button class="text-gray-300 hover:text-gray-600" onclick="event.stopPropagation()"><i data-lucide="more-vertical" class="w-4 h-4"></i></button>`
+                                }
+                            </div>
                         </div>
-                        <h3 class="font-bold text-gray-800 mb-3 text-sm leading-tight">${p.title}</h3>
+                        <h3 class="font-bold ${titleClass} mb-3 text-sm leading-tight">${p.title}</h3>
                         <div class="space-y-1.5 text-xs text-gray-500 font-medium">
-                            <div class="flex items-center"><i data-lucide="calendar" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> ${p.date}</div>
-                            <div class="flex items-center"><i data-lucide="map-pin" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> ${p.location}</div>
+                            <div class="flex items-center"><i data-lucide="calendar" class="w-3.5 h-3.5 mr-2 opacity-70"></i> ${p.date}</div>
+                            <div class="flex items-center"><i data-lucide="map-pin" class="w-3.5 h-3.5 mr-2 opacity-70"></i> ${p.location}</div>
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
             document.getElementById('programsContainer').innerHTML = html;
             lucide.createIcons();
+        }
+
+        // FUNGSI TOGGLE PROGRAM
+        function toggleProgram(id) {
+            const index = programs.findIndex(p => p.id === id);
+            if(index > -1) {
+                programs[index].completed = !programs[index].completed;
+                if(gasEndpointUrl) apiCall('update', 'Programs', programs[index]);
+                if(!document.getElementById('tab-programs').classList.contains('hidden')) {
+                    renderPrograms();
+                }
+                renderDashboardData();
+            }
+        }
+
+        // FUNGSI PAPAR MAKLUMAT TUGASAN TERPERINCI (VIEW DETAILS)
+        function viewTodoDetails(id) {
+            const todo = todos.find(t => t.id === id);
+            if(!todo) return;
+
+            const statusHTML = todo.completed 
+                ? '<span class="text-green-600 font-bold flex items-center"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 mr-1"></i> Selesai</span>' 
+                : '<span class="text-yellow-600 font-bold flex items-center"><i data-lucide="clock" class="w-3.5 h-3.5 mr-1"></i> Aktif / Tertunggak</span>';
+                
+            const notesText = todo.notes 
+                ? todo.notes.replace(/\n/g, '<br>') 
+                : '<i class="text-gray-400">Tiada catatan disertakan untuk tugasan ini.</i>';
+
+            const detailHTML = `
+                <div class="text-left space-y-3 mt-2">
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center">
+                        <span class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Status Semasa</span>
+                        <span class="text-sm">${statusHTML}</span>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center">
+                        <span class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Tarikh Jadual</span>
+                        <span class="text-sm font-medium text-gray-800">${todo.date}</span>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex justify-between items-center">
+                        <span class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Dimuat Naik Oleh</span>
+                        <span class="text-sm font-medium text-gray-800">${todo.addedBy || 'Sistem'}</span>
+                    </div>
+                    <div class="bg-blue-50/50 p-3 rounded-lg border border-blue-100 max-h-32 overflow-y-auto">
+                        <p class="text-xs text-blue-800 uppercase tracking-wider mb-1.5 font-bold flex items-center"><i data-lucide="file-text" class="w-3.5 h-3.5 mr-1"></i> Catatan</p>
+                        <p class="text-sm text-gray-700 leading-relaxed">${notesText}</p>
+                    </div>
+                    ${(todo.link || todo.pdf) ? `
+                    <div class="pt-2 flex flex-col gap-2">
+                        ${todo.link ? `<a href="${todo.link}" target="_blank" class="inline-flex items-center text-xs font-bold bg-blue-100 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-200 transition-colors"><i data-lucide="external-link" class="w-4 h-4 mr-2"></i> Buka Pautan Rujukan</a>` : ''}
+                        ${todo.pdf ? `<button onclick="showToast('Simulasi memuat turun PDF: ${todo.pdf}', 'info')" class="inline-flex items-center justify-center text-xs font-bold bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Muat Turun ${todo.pdf}</button>` : ''}
+                    </div>` : ''}
+                </div>
+            `;
+
+            showMiniWindow(todo.text, detailHTML, "info", "Tutup");
         }
 
         // --- SIMULASI EDGE AI CHATBOT ---
