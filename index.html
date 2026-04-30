@@ -450,7 +450,6 @@
         let editProgramId = null;
 
         let gasEndpointUrl = localStorage.getItem('pkg_gas_url') || 'https://script.google.com/macros/s/AKfycbwBkETtFzcceUu83o_2FeNlLJGfTmx3gmLFJJpSjoVpPMk03tahHX0hfUAGHaxZQVi7/exec'; 
-        const geminiApiKey = "AIzaSyCSFUBIPSq8az0NvdNKBssuoz018s0TeGM"; // API Key dibenam secara terus (hardcode)
 
         let usersData = [{ id: 'admin1', name: 'Mohd Shahrol', station: 'PKG Sarawak', email: 'mohd.shahrol@moe.gov.my', phone: '012-3456789', password: 'password', role: 'Admin' }];
         let linksRepo = [], todos = [], programs = [], checklists = [];
@@ -1177,28 +1176,69 @@
                 </div>`).join('');
         }
 
-        // --- GEMINI AI INTEGRATION ---
-        async function fetchGeminiWithRetry(query, contextData, sysPrompt, retries = 5) {
-            const apiKey = geminiApiKey || ""; 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-            const payload = { contents: [{ parts: [{ text: contextData + "\n\nSoalan Pengguna: " + query }] }], systemInstruction: { parts: [{ text: sysPrompt }] } };
-            const delays = [1000, 2000, 4000, 8000, 16000];
-            
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (!response.ok) {
-                        const errData = await response.json();
-                        throw new Error(`HTTP error! status: ${response.status} - ${errData.error?.message || 'Unknown Error'}`);
-                    }
-                    const data = await response.json();
-                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf bos, kamek kurang pasti bab tu.";
-                } catch (error) {
-                    console.error("Ralat Gemini:", error.message);
-                    if (i === retries - 1) return `Aduh, sistem kamek gagal berhubung. Ralat: ${error.message}`;
-                    await new Promise(res => setTimeout(res, delays[i]));
+        // --- LOGIK AI PEMBANTU (LOCAL REASONING) ---
+        function generateLocalAIResponse(query) {
+            const q = query.toLowerCase();
+            let response = "";
+
+            const isGreeting = /(hai|hi|salam|helo|hello|oy|uy|selamat)/.test(q);
+            const isToday = /(hari ini|hari tok|kinek|today)/.test(q);
+            const isTodo = /(tugas|kerja|todo|buat|kena buat|status|laporan)/.test(q);
+            const isProgram = /(program|acara|event|bengkel|kursus)/.test(q);
+            const isLink = /(pautan|link|url|website|sumber)/.test(q);
+            const isThanks = /(tq|terima kasih|mekasih|thank)/.test(q);
+
+            if (isToday) {
+                const todayTodos = todos.filter(t => t.date === currentDateStr);
+                response = `Untuk hari tok (**${currentDateStr}**), kitak ada **${todayTodos.length} tugasan** yang berjadual.\n`;
+                if (todayTodos.length > 0) {
+                    response += `Antaranya:\n${todayTodos.map(t => `- ${t.text} (${t.completed ? 'Selesai' : 'Belum'})`).join('\n')}\n`;
+                }
+                const activePrograms = programs.filter(p => !p.completed);
+                response += `\nOh ya, ada **${activePrograms.length} program** yang masih aktif dalam direktori kinek tok.`;
+            }
+            else if (isTodo) {
+                const pending = todos.filter(t => !t.completed);
+                const done = todos.filter(t => t.completed);
+                if (pending.length === 0) {
+                    response = `Mantap bos! Sikda tugasan tertunggak kinek tok. Kitak dah siapkan **${done.length} tugasan** keseluruhan. Boleh rehat jap!`;
+                } else {
+                    response = `Kitak ada **${pending.length} tugasan** yang belum siap kinek tok.\n\nTugasan teratas:\n`;
+                    response += pending.slice(0, 3).map(t => `- **${t.text}** (Tarikh: ${t.date})`).join('\n');
+                    if(pending.length > 3) response += `\n...dan ada ${pending.length - 3} lagik. Rajin-rajin check kalendar ya!`;
                 }
             }
+            else if (isProgram) {
+                const activePrograms = programs.filter(p => !p.completed);
+                if(activePrograms.length === 0) {
+                    response = "Sikda sebarang program aktif atau akan datang dalam rekod kamek buat masa tok.";
+                } else {
+                    response = `Kamek nemu **${activePrograms.length} program** aktif dalam direktori.\n\nSenarai terawal:\n`;
+                    response += activePrograms.slice(0, 3).map(p => `- **${p.title}** di ${p.location} pada ${p.date} (${p.status})`).join('\n');
+                }
+            }
+            else if (isLink) {
+                response = `Kamek jumpa **${linksRepo.length} pautan** rasmi dalam sistem.\n\n`;
+                const cats = [...new Set(linksRepo.map(l => l.category || 'Umum'))];
+                response += `Kategori yang ada termasuklah: **${cats.join(', ')}**.\nKalau mok carik pautan spesifik, boleh terus ke tab Repositori Pautan!`;
+            }
+            else if (isThanks) {
+                response = "Sama-sama bos! Kamek sentiasa sedia berkhidmat. Ada apa-apa lagik kamek boleh tolong?";
+            }
+            else if (isGreeting) {
+                response = `Aok bos **${currentUser.name.split(' ')[0]}**! Kamek pembantu AI local (sik perlu tenet) sedia mbantu. Boleh tanyak kamek spesifik pasal **tugasan**, **program**, **hari ini**, atau **pautan** sistem.`;
+            }
+            else {
+                // Keyword Search Fallback
+                const searchResults = todos.filter(t => t.text.toLowerCase().includes(q));
+                if (searchResults.length > 0) {
+                    response = `Kamek jumpa tugasan berkaitan "${q}":\n` + searchResults.map(t => `- **${t.text}** (${t.completed ? 'Selesai' : 'Belum'})`).join('\n');
+                } else {
+                    response = "Maaf bos, kamek AI local so kamek cuma faham maklumat dalam sistem tok jak. Cuba tanyak spesifik sikit pasal **'tugasan'**, **'program'**, atau **'hari ini'**.";
+                }
+            }
+
+            return response;
         }
 
         // --- CHATBOT SUBMIT ---
@@ -1218,15 +1258,22 @@
             chatMessages.insertAdjacentHTML('beforeend', `<div id="${typingId}" class="flex justify-start animate-fade-in"><div class="bg-white border border-gray-100 rounded-2xl rounded-tl-none p-4 shadow-sm flex space-x-1.5"><div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div><div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div><div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 300ms"></div></div></div>`);
             scrollToBottom();
 
-            const contextData = `Maklumat PKG:\n- Tarikh: ${currentDateStr}\n- User: ${currentUser.name}\nSemua Jadual/Tugas:\n${JSON.stringify(todos.map(t=>({tajuk:t.text, date:t.date, status:t.completed?'Selesai':'Belum'})))}\nProgram:\n${JSON.stringify(programs.map(p=>({tajuk:p.title,date:p.date,status:p.status})))}\nPautan:\n${JSON.stringify(linksRepo.map(l=>({title:l.title,url:l.url})))}`;
-            const sysPrompt = "Anda Pembantu AI PKG Sarawak. Balas guna bahasa pengguna (BM/English/Sarawak). Guna format **teks** untuk perkataan penting. Jawab ceria.";
-            const aiResponse = await fetchGeminiWithRetry(text, contextData, sysPrompt);
+            // Simulasi AI berfikir (800ms)
+            setTimeout(() => {
+                const aiResponse = generateLocalAIResponse(text);
 
-            const formattedResponse = aiResponse.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<b class="text-indigo-600 font-extrabold">$1</b>');
+                // Format: Tukar **teks** jadi bold dan \n jadi <br>
+                const formattedResponse = aiResponse
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<b class="text-indigo-600 font-extrabold">$1</b>');
 
-            const typingEl = document.getElementById(typingId); if(typingEl) typingEl.remove();
-            chatMessages.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-fade-in"><div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm bg-white border border-gray-100 text-gray-800 rounded-tl-none"><p class="text-sm">${formattedResponse}</p></div></div>`);
-            scrollToBottom(); lucide.createIcons(); chatSubmitBtn.disabled = false;
+                const typingEl = document.getElementById(typingId); if(typingEl) typingEl.remove();
+                chatMessages.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-fade-in"><div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm bg-white border border-gray-100 text-gray-800 rounded-tl-none"><p class="text-sm">${formattedResponse}</p></div></div>`);
+                
+                scrollToBottom(); 
+                lucide.createIcons(); 
+                chatSubmitBtn.disabled = false;
+            }, 800);
         });
 
     </script>
