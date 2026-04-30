@@ -249,10 +249,17 @@
                         <i data-lucide="filter" class="w-5 h-5 text-gray-400 ml-2"></i>
                         <select id="linkFilter" onchange="renderLinks()" class="flex-1 bg-transparent text-sm font-semibold text-gray-700 outline-none cursor-pointer border-none focus:ring-0">
                             <option value="All">Paparkan Semua Kategori</option>
-                            <option value="Sumber Pendidikan">Sumber Pendidikan</option>
-                            <option value="Pengintegrasian ICT">Pengintegrasian ICT</option>
-                            <option value="Pengurusan">Pengurusan</option>
-                            <option value="Lain-lain">Lain-lain</option>
+                            <option value="Pertandingan Galakan Membaca">Pertandingan Galakan Membaca</option>
+                            <option value="PPPDM">PPPDM</option>
+                            <option value="AINS">AINS</option>
+                            <option value="Pusat Sumber Sekolah">Pusat Sumber Sekolah</option>
+                            <option value="Pendidikan Digital">Pendidikan Digital</option>
+                            <option value="DELIMa">DELIMa</option>
+                            <option value="BBT dan eBaucar">BBT dan eBaucar</option>
+                            <option value="Media Pendidikan">Media Pendidikan</option>
+                            <option value="COE">COE</option>
+                            <option value="TV PSS">TV PSS</option>
+                            <option value="Umum">Umum</option>
                         </select>
                     </div>
 
@@ -384,10 +391,17 @@
                 <div>
                     <label class="block text-[10px] uppercase font-bold text-gray-500 mb-1">Kategori</label>
                     <select id="addLinkCategory" required class="w-full border border-gray-200 rounded-xl p-3 text-sm bg-gray-50 outline-none text-gray-700 cursor-pointer">
-                        <option value="Sumber Pendidikan">Sumber Pendidikan</option>
-                        <option value="Pengintegrasian ICT">Pengintegrasian ICT</option>
-                        <option value="Pengurusan">Pengurusan</option>
-                        <option value="Lain-lain">Lain-lain</option>
+                        <option value="Pertandingan Galakan Membaca">Pertandingan Galakan Membaca</option>
+                        <option value="PPPDM">PPPDM</option>
+                        <option value="AINS">AINS</option>
+                        <option value="Pusat Sumber Sekolah">Pusat Sumber Sekolah</option>
+                        <option value="Pendidikan Digital">Pendidikan Digital</option>
+                        <option value="DELIMa">DELIMa</option>
+                        <option value="BBT dan eBaucar">BBT dan eBaucar</option>
+                        <option value="Media Pendidikan">Media Pendidikan</option>
+                        <option value="COE">COE</option>
+                        <option value="TV PSS">TV PSS</option>
+                        <option value="Umum">Umum</option>
                     </select>
                 </div>
                 <div>
@@ -1018,10 +1032,10 @@
                     document.getElementById('addLinkTitle').value = l.title; 
                     document.getElementById('addLinkUrl').value = l.url; 
                     document.getElementById('addLinkDesc').value = l.desc || ''; 
-                    document.getElementById('addLinkCategory').value = l.category || 'Sumber Pendidikan'; 
+                    document.getElementById('addLinkCategory').value = l.category || 'Umum'; 
                 } 
             } else {
-                document.getElementById('addLinkCategory').value = 'Sumber Pendidikan'; 
+                document.getElementById('addLinkCategory').value = 'Umum'; 
             }
             document.getElementById('linkModal').classList.remove('hidden'); 
             document.getElementById('linkModal').classList.add('flex'); 
