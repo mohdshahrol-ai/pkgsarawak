@@ -1190,65 +1190,159 @@
                 </div>`).join('');
         }
 
-        // --- LOGIK AI PEMBANTU (LOCAL REASONING) ---
+        // --- LOGIK AI PEMBANTU (LOCAL REASONING DENGAN ADAPTASI BAHASA) ---
         function generateLocalAIResponse(query) {
             const q = query.toLowerCase();
             let response = "";
 
-            const isGreeting = /(hai|hi|salam|helo|hello|oy|uy|selamat)/.test(q);
-            const isToday = /(hari ini|hari tok|kinek|today)/.test(q);
-            const isTodo = /(tugas|kerja|todo|buat|kena buat|status|laporan)/.test(q);
-            const isProgram = /(program|acara|event|bengkel|kursus)/.test(q);
-            const isLink = /(pautan|link|url|website|sumber)/.test(q);
-            const isThanks = /(tq|terima kasih|mekasih|thank)/.test(q);
+            // 1. Pengesanan Bahasa (Language Detection)
+            let lang = 'ms'; // Default: Bahasa Melayu Standard
+            if (/(kamek|kitak|sik|aok|mok|padah|tok|kinek|nemu)/.test(q)) {
+                lang = 'swk'; // Bahasa Sarawak
+            } else if (/(what|how|today|task|program|link|thank|tired|stress|help|hello|hi)/.test(q) && !/(macam mana|hari ini|tugasan|terima kasih|penat)/.test(q)) {
+                lang = 'en'; // English
+            }
 
-            if (isToday) {
+            // 2. Pengesanan Kata Kunci (Keyword Matching Regex)
+            const isGreeting = /(hai|hi|salam|helo|hello|oy|uy|selamat)/.test(q);
+            const isToday = /(hari ini|hari tok|kinek|today|harini)/.test(q);
+            const isTodo = /(tugas|kerja|todo|buat|kena buat|status|laporan|semakan|selesai|belum|task)/.test(q);
+            const isProgram = /(program|acara|event|bengkel|kursus|aktiviti)/.test(q);
+            const isLink = /(pautan|link|url|website|sumber|repositori|sistem)/.test(q);
+            const isThanks = /(tq|terima|mekasih|thank|thx)/.test(q);
+            const isMotivation = /(stress|penat|letih|motivasi|semangat|down|sedih|bosan|give up|murung|tired|exhausted)/.test(q);
+            const isHelp = /(macam mana|fungsi|tolong|bantu|cara|guna|beruang|anti stress|help|how to|guide)/.test(q);
+
+            if (isMotivation) {
+                const quote = stressMotivations[Math.floor(Math.random() * stressMotivations.length)];
+                if (lang === 'swk') response = `Alololo, penat ke bos? Jangan macam tu. Kamek ada kata-kata sikit untuk kitak:\n\n*"${quote}"*\n\nKalau rasa tepu sangat, cuba tarik ikon beruang kat tepi tu atau tekan banyak kali. Confirm turun salji love untuk kitak! Fighting! 💪`;
+                else if (lang === 'en') response = `Feeling stressed or tired, boss? Don't worry. Here's a little motivation for you:\n\n*"${quote}"*\n\nIf you need a break, try dragging the bear icon on the right or tap it multiple times. It will rain love emojis! Fighting! 💪`;
+                else response = `Alamak, penat ya bos? Jangan putus asa. Ini ada sedikit kata-kata semangat untuk anda:\n\n*"${quote}"*\n\nKalau rasa stress sangat, cuba tarik ikon beruang comel di tepi tu atau tekan banyak kali untuk turunkan salji 'love'! Teruskan usaha! 💪`;
+            }
+            else if (isHelp) {
+                if (lang === 'swk') response = `Dalam sistem PKG tok, kitak boleh buat macam-macam bos:\n- **Kalendar & Tugas**: Tambah kerja hakiki, rekod tindakan, n hantar *reminder* kat kawan.\n- **Program**: Simpan senarai acara atau kursus PKG.\n- **Repositori**: Kumpul semua link penting ikut kategori.\n- **Beruang Comel**: Boleh *drag* merata-rata. Tekan untuk turun salji emoji!\nAda benda spesifik kitak nak kamek carikan?`;
+                else if (lang === 'en') response = `In this PKG system, you can do many things, boss:\n- **Calendar & Tasks**: Add tasks, track actions, and send *reminders* to colleagues.\n- **Programs**: Keep a list of events or PKG courses.\n- **Repository**: Collect all important links by category.\n- **Cute Bear**: You can *drag* it around. Tap it for emoji snow!\nIs there anything specific you want me to find?`;
+                else response = `Dalam sistem PKG ini, anda boleh melakukan pelbagai perkara bos:\n- **Kalendar & Tugas**: Tambah tugas, rekod tindakan, dan hantar *peringatan* kepada rakan.\n- **Program**: Simpan senarai acara atau kursus PKG.\n- **Repositori**: Kumpul semua pautan penting mengikut kategori.\n- **Beruang Comel**: Boleh ditarik (*drag*) merata tempat. Tekan untuk turunkan salji emoji!\nAda apa-apa spesifik yang anda mahu saya carikan?`;
+            }
+            else if (isToday) {
                 const todayTodos = todos.filter(t => t.date === currentDateStr);
-                response = `Untuk hari tok (**${currentDateStr}**), kitak ada **${todayTodos.length} tugasan** yang berjadual.\n`;
-                if (todayTodos.length > 0) {
-                    response += `Antaranya:\n${todayTodos.map(t => `- ${t.text} (${t.completed ? 'Selesai' : 'Belum'})`).join('\n')}\n`;
-                }
                 const activePrograms = programs.filter(p => !p.completed);
-                response += `\nOh ya, ada **${activePrograms.length} program** yang masih aktif dalam direktori kinek tok.`;
+                if (lang === 'swk') {
+                    response = `Untuk hari tok (**${currentDateStr}**), kitak ada **${todayTodos.length} tugasan** berjadual.\n`;
+                    if (todayTodos.length > 0) response += `Antaranya:\n${todayTodos.map(t => `- ${t.text} (${t.completed ? 'Selesai' : 'Belum'})`).join('\n')}\n`;
+                    response += `\nOh ya, ada **${activePrograms.length} program** yang masih aktif kinek tok.`;
+                } else if (lang === 'en') {
+                    response = `For today (**${currentDateStr}**), you have **${todayTodos.length} scheduled tasks**.\n`;
+                    if (todayTodos.length > 0) response += `They are:\n${todayTodos.map(t => `- ${t.text} (${t.completed ? 'Done' : 'Pending'})`).join('\n')}\n`;
+                    response += `\nOh, and there are **${activePrograms.length} active programs** currently.`;
+                } else {
+                    response = `Untuk hari ini (**${currentDateStr}**), anda ada **${todayTodos.length} tugasan** yang berjadual.\n`;
+                    if (todayTodos.length > 0) response += `Antaranya:\n${todayTodos.map(t => `- ${t.text} (${t.completed ? 'Selesai' : 'Belum'})`).join('\n')}\n`;
+                    response += `\nOh ya, terdapat **${activePrograms.length} program** yang masih aktif buat masa ini.`;
+                }
             }
             else if (isTodo) {
                 const pending = todos.filter(t => !t.completed);
                 const done = todos.filter(t => t.completed);
                 if (pending.length === 0) {
-                    response = `Mantap bos! Sikda tugasan tertunggak kinek tok. Kitak dah siapkan **${done.length} tugasan** keseluruhan. Boleh rehat jap!`;
+                    if (lang === 'swk') response = `Mantap bos! Sikda tugasan tertunggak kinek tok. Kitak dah siapkan **${done.length} tugasan**. Boleh rehat jap!`;
+                    else if (lang === 'en') response = `Awesome boss! No pending tasks right now. You've completed **${done.length} tasks** in total. Time for a quick break!`;
+                    else response = `Hebat bos! Tiada tugasan tertunggak sekarang. Anda telah menyiapkan **${done.length} tugasan** keseluruhan. Boleh rehat sebentar!`;
                 } else {
-                    response = `Kitak ada **${pending.length} tugasan** yang belum siap kinek tok.\n\nTugasan teratas:\n`;
+                    if (lang === 'swk') response = `Kitak ada **${pending.length} tugasan** yang belum siap kinek tok.\n\nTugasan teratas:\n`;
+                    else if (lang === 'en') response = `You currently have **${pending.length} pending tasks**.\n\nTop tasks:\n`;
+                    else response = `Anda mempunyai **${pending.length} tugasan** yang belum disiapkan.\n\nTugasan teratas:\n`;
+                    
                     response += pending.slice(0, 3).map(t => `- **${t.text}** (Tarikh: ${t.date})`).join('\n');
-                    if(pending.length > 3) response += `\n...dan ada ${pending.length - 3} lagik. Rajin-rajin check kalendar ya!`;
+                    if(pending.length > 3) {
+                        if (lang === 'swk') response += `\n...dan ada ${pending.length - 3} lagik. Rajin-rajin check kalendar ya!`;
+                        else if (lang === 'en') response += `\n...and ${pending.length - 3} more. Check your calendar!`;
+                        else response += `\n...dan ada ${pending.length - 3} lagi. Jangan lupa semak kalendar anda!`;
+                    }
                 }
             }
             else if (isProgram) {
                 const activePrograms = programs.filter(p => !p.completed);
+                const terkini = programs.filter(p => p.status === 'Sedang Berlangsung' && !p.completed);
+                const akanDatang = programs.filter(p => p.status === 'Akan Datang' && !p.completed);
+
                 if(activePrograms.length === 0) {
-                    response = "Sikda sebarang program aktif atau akan datang dalam rekod kamek buat masa tok.";
+                    if (lang === 'swk') response = "Sikda sebarang program terkini atau akan datang dalam rekod kamek buat masa tok.";
+                    else if (lang === 'en') response = "There are no current or upcoming programs in my records at the moment.";
+                    else response = "Tiada sebarang program terkini atau akan datang dalam rekod saya buat masa ini.";
                 } else {
-                    response = `Kamek nemu **${activePrograms.length} program** aktif dalam direktori.\n\nSenarai terawal:\n`;
-                    response += activePrograms.slice(0, 3).map(p => `- **${p.title}** di ${p.location} pada ${p.date} (${p.status})`).join('\n');
+                    if (lang === 'swk') response = `Kamek nemu **${activePrograms.length} program** aktif dalam direktori.\n\n`;
+                    else if (lang === 'en') response = `I found **${activePrograms.length} active programs** in the directory.\n\n`;
+                    else response = `Saya menjumpai **${activePrograms.length} program** aktif dalam direktori.\n\n`;
+                    
+                    if (terkini.length > 0) {
+                        if (lang === 'swk') response += `🔥 **Program Terkini (Sedang Berlangsung):**\n`;
+                        else if (lang === 'en') response += `🔥 **Current Programs (Ongoing):**\n`;
+                        else response += `🔥 **Program Terkini (Sedang Berlangsung):**\n`;
+                        
+                        response += terkini.slice(0, 3).map(p => `- **${p.title}** di ${p.location} pada ${p.date}`).join('\n') + `\n\n`;
+                    }
+
+                    if (akanDatang.length > 0) {
+                        if (lang === 'swk') response += `📅 **Program Akan Datang:**\n`;
+                        else if (lang === 'en') response += `📅 **Upcoming Programs:**\n`;
+                        else response += `📅 **Program Akan Datang:**\n`;
+                        
+                        response += akanDatang.slice(0, 3).map(p => `- **${p.title}** di ${p.location} pada ${p.date}`).join('\n') + `\n`;
+                    }
                 }
             }
             else if (isLink) {
-                response = `Kamek jumpa **${linksRepo.length} pautan** rasmi dalam sistem.\n\n`;
+                if (lang === 'swk') response = `Kamek jumpa **${linksRepo.length} pautan** rasmi dalam sistem.\n\n`;
+                else if (lang === 'en') response = `I found **${linksRepo.length} official links** in the system.\n\n`;
+                else response = `Saya menjumpai **${linksRepo.length} pautan** rasmi dalam sistem.\n\n`;
+                
                 const cats = [...new Set(linksRepo.map(l => l.category || 'Umum'))];
-                response += `Kategori yang ada termasuklah: **${cats.join(', ')}**.\nKalau mok carik pautan spesifik, boleh terus ke tab Repositori Pautan!`;
+                
+                if (lang === 'swk') response += `Kategori yang ada termasuklah: **${cats.join(', ')}**.\nBoleh terus ke tab Repositori Pautan kalau mok tengok semua!`;
+                else if (lang === 'en') response += `Available categories include: **${cats.join(', ')}**.\nYou can navigate to the Links Repository tab to view them all!`;
+                else response += `Kategori yang ada termasuklah: **${cats.join(', ')}**.\nSila ke tab Repositori Pautan untuk melihat semuanya!`;
             }
             else if (isThanks) {
-                response = "Sama-sama bos! Kamek sentiasa sedia berkhidmat. Ada apa-apa lagik kamek boleh tolong?";
+                if (lang === 'swk') response = "Sama-sama bos! Kamek sentiasa sedia berkhidmat. Ada apa-apa lagik kamek boleh tolong?";
+                else if (lang === 'en') response = "You're welcome, boss! I'm always ready to serve. Anything else I can help you with?";
+                else response = "Sama-sama bos! Saya sentiasa bersedia berkhidmat. Ada apa-apa lagi yang boleh saya bantu?";
             }
             else if (isGreeting) {
-                response = `Aok bos **${currentUser.name.split(' ')[0]}**! Kamek pembantu AI local (sik perlu tenet) sedia mbantu. Boleh tanyak kamek spesifik pasal **tugasan**, **program**, **hari ini**, atau **pautan** sistem.`;
+                const name = currentUser.name.split(' ')[0];
+                if (lang === 'swk') response = `Aok bos **${name}**! Kamek pembantu AI local sedia mbantu. Boleh tanyak kamek spesifik pasal **tugasan**, **program**, **hari ini**, **pautan**, nak **motivasi** sikit atau tanya **cara guna sistem** tok.`;
+                else if (lang === 'en') response = `Hello boss **${name}**! I am your local AI assistant ready to help. You can ask me specifics about **tasks**, **programs**, **today**, **links**, ask for some **motivation**, or ask **how to use this system**.`;
+                else response = `Hai bos **${name}**! Saya pembantu AI tempatan anda sedia membantu. Anda boleh bertanya spesifik tentang **tugasan**, **program**, **hari ini**, **pautan**, minta **motivasi**, atau tanya **cara guna sistem** ini.`;
             }
             else {
-                // Keyword Search Fallback
-                const searchResults = todos.filter(t => t.text.toLowerCase().includes(q));
-                if (searchResults.length > 0) {
-                    response = `Kamek jumpa tugasan berkaitan "${q}":\n` + searchResults.map(t => `- **${t.text}** (${t.completed ? 'Selesai' : 'Belum'})`).join('\n');
-                } else {
-                    response = "Maaf bos, kamek AI local so kamek cuma faham maklumat dalam sistem tok jak. Cuba tanyak spesifik sikit pasal **'tugasan'**, **'program'**, atau **'hari ini'**.";
+                // Carian Mendalam Fallback (Deep Search)
+                const searchTodos = todos.filter(t => t.text.toLowerCase().includes(q));
+                const searchPrograms = programs.filter(p => p.title.toLowerCase().includes(q) || p.location.toLowerCase().includes(q));
+                const searchLinks = linksRepo.filter(l => l.title.toLowerCase().includes(q) || (l.desc && l.desc.toLowerCase().includes(q)) || (l.category && l.category.toLowerCase().includes(q)));
+                
+                let foundSomething = false;
+                
+                if (lang === 'swk') response = `Kamek ada jumpa sikit info berkaitan pertanyaan bos tu:\n\n`;
+                else if (lang === 'en') response = `I found some info related to your query:\n\n`;
+                else response = `Saya terjumpa sedikit maklumat berkaitan pertanyaan bos itu:\n\n`;
+                
+                if (searchTodos.length > 0) {
+                    foundSomething = true;
+                    response += `**Tugasan (Tasks):**\n${searchTodos.map(t => `- ${t.text} (${t.completed ? 'Selesai/Done' : 'Aktif/Pending'})`).join('\n')}\n\n`;
+                }
+                if (searchPrograms.length > 0) {
+                    foundSomething = true;
+                    response += `**Program:**\n${searchPrograms.map(p => `- ${p.title} (${p.status})`).join('\n')}\n\n`;
+                }
+                if (searchLinks.length > 0) {
+                    foundSomething = true;
+                    response += `**Pautan (Links):**\n${searchLinks.map(l => `- [${l.category}] ${l.title}`).join('\n')}\n\n`;
+                }
+                
+                if (!foundSomething) {
+                    if (lang === 'swk') response = "Maaf bos, kamek sik jumpa info pasal tu dalam database kita. Cuba check ejaan atau tanyak spesifik pasal **'tugasan'**, **'program'**, **'hari ini'**, nak **'motivasi'** sikit, atau **cara guna sistem** tok.";
+                    else if (lang === 'en') response = "Sorry boss, I couldn't find any info on that in our database. Please check your spelling or ask specifically about **'tasks'**, **'programs'**, **'today'**, for some **'motivation'**, or **how to use the system**.";
+                    else response = "Maaf bos, saya tidak menemui maklumat tentang itu di dalam pangkalan data. Cuba semak ejaan atau tanya secara spesifik mengenai **'tugasan'**, **'program'**, **'hari ini'**, minta **'motivasi'**, atau **cara guna sistem** ini.";
                 }
             }
 
@@ -1261,7 +1355,7 @@
         
         chatInput.addEventListener('input', () => { chatSubmitBtn.disabled = chatInput.value.trim() === ''; });
 
-        chatForm.addEventListener('submit', async (e) => {
+        chatForm.addEventListener('submit', (e) => {
             e.preventDefault(); const text = chatInput.value.trim(); if(!text) return;
             chatSubmitBtn.disabled = true; chatInput.value = ''; 
             
@@ -1272,7 +1366,7 @@
             chatMessages.insertAdjacentHTML('beforeend', `<div id="${typingId}" class="flex justify-start animate-fade-in"><div class="bg-white border border-gray-100 rounded-2xl rounded-tl-none p-4 shadow-sm flex space-x-1.5"><div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0ms"></div><div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div><div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 300ms"></div></div></div>`);
             scrollToBottom();
 
-            // Simulasi AI berfikir (800ms)
+            // Simulasi AI berfikir (800ms) untuk menampakkan respon yang natural
             setTimeout(() => {
                 const aiResponse = generateLocalAIResponse(text);
 
@@ -1282,8 +1376,8 @@
                     .replace(/\*\*(.*?)\*\*/g, '<b class="text-indigo-600 font-extrabold">$1</b>');
 
                 const typingEl = document.getElementById(typingId); if(typingEl) typingEl.remove();
-                chatMessages.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-fade-in"><div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm bg-white border border-gray-100 text-gray-800 rounded-tl-none"><p class="text-sm">${formattedResponse}</p></div></div>`);
                 
+                chatMessages.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-fade-in"><div class="max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm bg-white border border-gray-100 text-gray-800 rounded-tl-none"><p class="text-sm">${formattedResponse}</p></div></div>`);
                 scrollToBottom(); 
                 lucide.createIcons(); 
                 chatSubmitBtn.disabled = false;
