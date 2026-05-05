@@ -237,33 +237,30 @@
                     <div id="programsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
 
-                <!-- Tab Pautan (Dikemaskini dengan Kategori) -->
+                <!-- Tab Pautan (Dikemaskini dengan Folder & Search) -->
                 <div id="tab-links" class="space-y-4 animate-slide-up hidden max-w-6xl mx-auto">
                     <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                         <h2 class="text-lg font-bold text-gray-800">Repositori Pautan</h2>
                         <button onclick="openLinkModal()" class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-md text-sm font-bold active:scale-95 transition-transform"><i data-lucide="plus" class="w-4 h-4 md:mr-1"></i> <span class="hidden md:inline">Tambah</span></button>
                     </div>
                     
-                    <!-- Penapis (Filter) Kategori -->
-                    <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-2">
-                        <i data-lucide="filter" class="w-5 h-5 text-gray-400 ml-2"></i>
-                        <select id="linkFilter" onchange="renderLinks()" class="flex-1 bg-transparent text-sm font-semibold text-gray-700 outline-none cursor-pointer border-none focus:ring-0">
-                            <option value="All">Paparkan Semua Kategori</option>
-                            <option value="Pertandingan Galakan Membaca">Pertandingan Galakan Membaca</option>
-                            <option value="PPPDM">PPPDM</option>
-                            <option value="AINS">AINS</option>
-                            <option value="Pusat Sumber Sekolah">Pusat Sumber Sekolah</option>
-                            <option value="Pendidikan Digital">Pendidikan Digital</option>
-                            <option value="DELIMa">DELIMa</option>
-                            <option value="BBT dan eBaucar">BBT dan eBaucar</option>
-                            <option value="Media Pendidikan">Media Pendidikan</option>
-                            <option value="COE">COE</option>
-                            <option value="TV PSS">TV PSS</option>
-                            <option value="Umum">Umum</option>
-                        </select>
+                    <!-- Bar Carian & Navigasi -->
+                    <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-3">
+                        <div id="linkBreadcrumb" class="hidden items-center mr-2 border-r border-gray-100 pr-3">
+                            <button onclick="closeLinkFolder()" class="p-2 text-gray-500 hover:bg-gray-50 hover:text-blue-600 rounded-lg flex items-center transition-colors shadow-sm border border-transparent hover:border-gray-200">
+                                <i data-lucide="arrow-left" class="w-5 h-5 md:mr-1"></i> <span class="hidden md:inline text-sm font-bold">Kembali</span>
+                            </button>
+                            <span id="currentFolderName" class="ml-3 font-bold text-indigo-700 text-sm hidden lg:inline bg-indigo-50 px-3 py-1 rounded-lg">Kategori</span>
+                        </div>
+                        
+                        <div class="flex-1 flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all shadow-inner">
+                            <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+                            <input type="text" id="linkSearch" oninput="renderLinks()" placeholder="Cari tajuk, penerangan, atau pautan..." class="w-full bg-transparent border-none outline-none ml-3 text-sm text-gray-700 placeholder-gray-400">
+                            <button onclick="document.getElementById('linkSearch').value=''; renderLinks();" class="text-gray-400 hover:text-red-500 transition-colors focus:outline-none"><i data-lucide="x-circle" class="w-4 h-4"></i></button>
+                        </div>
                     </div>
 
-                    <div id="linksContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    <div id="linksContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-6"></div>
                 </div>
 
                 <!-- Tab Chatbot Edge AI -->
@@ -462,10 +459,10 @@
         let editTodoId = null;
         let editLinkId = null;
         let editProgramId = null;
+        let currentLinkFolder = null; // null = papar folder, string = paparan dalam folder
 
         let gasEndpointUrl = localStorage.getItem('pkg_gas_url') || 'https://script.google.com/macros/s/AKfycbwBkETtFzcceUu83o_2FeNlLJGfTmx3gmLFJJpSjoVpPMk03tahHX0hfUAGHaxZQVi7/exec'; 
-
-        let usersData = [{ id: 'admin1', name: 'Mohd Shahrol', station: 'PKG Sarawak', email: 'mohd.shahrol@moe.gov.my', phone: '012-3456789', password: 'password', role: 'Admin' }];
+        const geminiApiKey = "AIzaSyCSFUBIPSq8az0NvdNKBssuoz018s0TeGM"; 
         let linksRepo = [], todos = [], programs = [], checklists = [];
         
         document.getElementById('currentDateDisplayDashboard').innerText = new Date().toLocaleDateString('ms-MY', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -1145,33 +1142,105 @@
             lucide.createIcons();
         }
 
-        // MEMBAIKI SYNTAX ERROR & MENAMBAH LOGIK FILTER KATEGORI PAUTAN
-        function renderLinks() {
-            const filterVal = document.getElementById('linkFilter') ? document.getElementById('linkFilter').value : 'All';
-            const filteredLinks = filterVal === 'All' ? linksRepo : linksRepo.filter(l => l.category === filterVal);
+        // --- SISTEM REPOSITORI PAUTAN: FOLDER & CARIAN ---
+        function openLinkFolder(category) {
+            currentLinkFolder = category;
+            document.getElementById('linkSearch').value = ''; 
+            renderLinks();
+        }
 
-            document.getElementById('linksContainer').innerHTML = filteredLinks.map(link => `
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col hover:border-blue-200 transition-colors">
-                <div class="flex justify-between items-start mb-3">
-                    <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mr-3 flex-shrink-0">
-                        <i data-lucide="link" class="w-5 h-5"></i>
+        function closeLinkFolder() {
+            currentLinkFolder = null;
+            document.getElementById('linkSearch').value = '';
+            renderLinks();
+        }
+
+        function renderLinkCards(linksArray, container) {
+            if (linksArray.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200"><i data-lucide="link-2-off" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i><p class="text-sm text-gray-500 font-medium">Tiada pautan dijumpai.</p></div>`;
+                return;
+            }
+            
+            container.innerHTML = linksArray.map(link => `
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col hover:border-blue-300 transition-all transform hover:-translate-y-1 group">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mr-3 flex-shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                            <i data-lucide="link" class="w-5 h-5"></i>
+                        </div>
+                        <div class="flex-1 pt-1">
+                            <h3 class="font-bold text-gray-800 text-sm">${link.title}</h3>
+                            ${!currentLinkFolder ? `<span class="text-[9px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded mt-1.5 inline-block uppercase tracking-wider border border-gray-200">${link.category || 'Umum'}</span>` : ''}
+                        </div>
+                        <a href="${link.url}" target="_blank" class="p-2 bg-gray-50 text-gray-400 hover:text-blue-600 rounded-lg ml-2 transition-colors flex-shrink-0 hover:bg-blue-50">
+                            <i data-lucide="external-link" class="w-4 h-4"></i>
+                        </a>
                     </div>
-                    <div class="flex-1 pt-1">
-                        <h3 class="font-bold text-gray-800 text-sm">${link.title}</h3>
-                        <span class="text-[9px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded mt-1 inline-block uppercase tracking-wider border border-indigo-100">${link.category || 'Umum'}</span>
+                    <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-3 rounded-xl flex-1 border border-gray-50 leading-relaxed">${link.desc}</p>
+                    <div class="flex justify-between items-center border-t border-gray-50 pt-3">
+                        <span class="text-[10px] text-gray-400 font-medium flex items-center">
+                            <i data-lucide="user" class="w-3 h-3 mr-1"></i> ${link.addedBy}
+                        </span>
+                        ${checkEditPermission(link.addedBy) ? `<button onclick="openLinkModal(${link.id})" class="text-[10px] font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors shadow-sm"><i data-lucide="edit-2" class="w-3 h-3 inline mr-1"></i>Edit</button>` : ''}
                     </div>
-                    <a href="${link.url}" target="_blank" class="p-2 bg-gray-50 text-gray-400 hover:text-blue-600 rounded-lg ml-2 transition-colors flex-shrink-0">
-                        <i data-lucide="external-link" class="w-4 h-4"></i>
-                    </a>
-                </div>
-                <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-3 rounded-xl flex-1 border border-gray-50">${link.desc}</p>
-                <div class="flex justify-between items-center border-t border-gray-100 pt-3">
-                    <span class="text-[10px] text-gray-400 font-medium flex items-center">
-                        <i data-lucide="user" class="w-3 h-3 mr-1"></i> ${link.addedBy}
-                    </span>
-                    ${checkEditPermission(link.addedBy) ? `<button onclick="openLinkModal(${link.id})" class="text-[10px] font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"><i data-lucide="edit-2" class="w-3 h-3 inline mr-1"></i>Edit</button>` : ''}
-                </div>
-            </div>`).join('') || `<div class="col-span-full py-10 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200"><i data-lucide="link-2-off" class="w-10 h-10 text-gray-300 mx-auto mb-3"></i><p class="text-sm text-gray-500 font-medium">Tiada pautan untuk kategori ini.</p></div>`;
+                </div>`).join('');
+        }
+
+        function renderLinks() {
+            const searchInput = document.getElementById('linkSearch');
+            const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            const container = document.getElementById('linksContainer');
+            const breadcrumb = document.getElementById('linkBreadcrumb');
+            const folderNameEl = document.getElementById('currentFolderName');
+            
+            // Senarai Kategori Standard
+            const standardCategories = ["Pertandingan Galakan Membaca", "PPPDM", "AINS", "Pusat Sumber Sekolah", "Pendidikan Digital", "DELIMa", "BBT dan eBaucar", "Media Pendidikan", "COE", "TV PSS", "Umum"];
+            const allCats = [...new Set([...standardCategories, ...linksRepo.map(l => l.category || 'Umum')])];
+
+            if (searchVal !== '') {
+                // MOD CARIAN GLOBAL
+                breadcrumb.classList.remove('hidden'); breadcrumb.classList.add('flex');
+                folderNameEl.innerText = "Keputusan Carian";
+                
+                const filteredLinks = linksRepo.filter(l => 
+                    l.title.toLowerCase().includes(searchVal) || 
+                    (l.desc && l.desc.toLowerCase().includes(searchVal)) ||
+                    (l.category && l.category.toLowerCase().includes(searchVal)) ||
+                    l.url.toLowerCase().includes(searchVal)
+                );
+                renderLinkCards(filteredLinks, container);
+            } 
+            else if (currentLinkFolder === null) {
+                // MOD PAPARAN FOLDER UTAMA
+                breadcrumb.classList.add('hidden'); breadcrumb.classList.remove('flex');
+                
+                let html = '';
+                allCats.forEach(cat => {
+                    const count = linksRepo.filter(l => (l.category || 'Umum') === cat).length;
+                    html += `
+                    <div onclick="openLinkFolder('${cat}')" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center cursor-pointer hover:shadow-md hover:border-blue-300 transition-all transform hover:-translate-y-1 group relative overflow-hidden">
+                        <div class="absolute right-0 top-0 opacity-5 transform translate-x-4 -translate-y-4 group-hover:scale-125 transition-transform duration-500">
+                            <i data-lucide="folder" class="w-24 h-24"></i>
+                        </div>
+                        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mr-4 flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors z-10 shadow-inner">
+                            <i data-lucide="folder" class="w-7 h-7"></i>
+                        </div>
+                        <div class="flex-1 overflow-hidden z-10">
+                            <h3 class="font-bold text-gray-800 text-sm truncate group-hover:text-blue-700 transition-colors">${cat}</h3>
+                            <p class="text-xs text-gray-500 mt-1 font-medium bg-gray-50 inline-block px-2 py-0.5 rounded border border-gray-100">${count} Pautan</p>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors z-10 ml-2"></i>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            } 
+            else {
+                // MOD DI DALAM FOLDER
+                breadcrumb.classList.remove('hidden'); breadcrumb.classList.add('flex');
+                folderNameEl.innerText = currentLinkFolder;
+                
+                const filteredLinks = linksRepo.filter(l => (l.category || 'Umum') === currentLinkFolder);
+                renderLinkCards(filteredLinks, container);
+            }
             
             lucide.createIcons();
         }
